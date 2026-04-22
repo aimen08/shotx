@@ -44,6 +44,10 @@
         },
         {
           "kind" : "file",
+          "name" : "/Users/mac/.superset/projects/shotx/Sources/ShotX/GIFConverter.swift"
+        },
+        {
+          "kind" : "file",
           "name" : "/Users/mac/.superset/projects/shotx/Sources/ShotX/HistoryStore.swift"
         },
         {
@@ -80,7 +84,27 @@
         },
         {
           "kind" : "file",
+          "name" : "/Users/mac/.superset/projects/shotx/Sources/ShotX/RecordingCompletePopup.swift"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/mac/.superset/projects/shotx/Sources/ShotX/RecordingController.swift"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/mac/.superset/projects/shotx/Sources/ShotX/RecordingFrameOverlay.swift"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/mac/.superset/projects/shotx/Sources/ShotX/RecordingUI.swift"
+        },
+        {
+          "kind" : "file",
           "name" : "/Users/mac/.superset/projects/shotx/Sources/ShotX/ScreenCapture.swift"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/mac/.superset/projects/shotx/Sources/ShotX/ScreenRecorder.swift"
         },
         {
           "kind" : "file",
@@ -93,6 +117,10 @@
         {
           "kind" : "file",
           "name" : "/Users/mac/.superset/projects/shotx/Sources/ShotX/ShortcutStore.swift"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/mac/.superset/projects/shotx/Sources/ShotX/SoundEffect.swift"
         },
         {
           "kind" : "file",
@@ -120,6 +148,7 @@
         "/Users/mac/.superset/projects/shotx/.build/arm64-apple-macosx/debug/ShotX.build/AppDelegate.swift.o",
         "/Users/mac/.superset/projects/shotx/.build/arm64-apple-macosx/debug/ShotX.build/DesktopIcons.swift.o",
         "/Users/mac/.superset/projects/shotx/.build/arm64-apple-macosx/debug/ShotX.build/FloatingPanels.swift.o",
+        "/Users/mac/.superset/projects/shotx/.build/arm64-apple-macosx/debug/ShotX.build/GIFConverter.swift.o",
         "/Users/mac/.superset/projects/shotx/.build/arm64-apple-macosx/debug/ShotX.build/HistoryStore.swift.o",
         "/Users/mac/.superset/projects/shotx/.build/arm64-apple-macosx/debug/ShotX.build/HotKeyManager.swift.o",
         "/Users/mac/.superset/projects/shotx/.build/arm64-apple-macosx/debug/ShotX.build/ImageSaver.swift.o",
@@ -129,10 +158,16 @@
         "/Users/mac/.superset/projects/shotx/.build/arm64-apple-macosx/debug/ShotX.build/OverlayWindow.swift.o",
         "/Users/mac/.superset/projects/shotx/.build/arm64-apple-macosx/debug/ShotX.build/PinnedImage.swift.o",
         "/Users/mac/.superset/projects/shotx/.build/arm64-apple-macosx/debug/ShotX.build/PostCapturePopup.swift.o",
+        "/Users/mac/.superset/projects/shotx/.build/arm64-apple-macosx/debug/ShotX.build/RecordingCompletePopup.swift.o",
+        "/Users/mac/.superset/projects/shotx/.build/arm64-apple-macosx/debug/ShotX.build/RecordingController.swift.o",
+        "/Users/mac/.superset/projects/shotx/.build/arm64-apple-macosx/debug/ShotX.build/RecordingFrameOverlay.swift.o",
+        "/Users/mac/.superset/projects/shotx/.build/arm64-apple-macosx/debug/ShotX.build/RecordingUI.swift.o",
         "/Users/mac/.superset/projects/shotx/.build/arm64-apple-macosx/debug/ShotX.build/ScreenCapture.swift.o",
+        "/Users/mac/.superset/projects/shotx/.build/arm64-apple-macosx/debug/ShotX.build/ScreenRecorder.swift.o",
         "/Users/mac/.superset/projects/shotx/.build/arm64-apple-macosx/debug/ShotX.build/SelectionView.swift.o",
         "/Users/mac/.superset/projects/shotx/.build/arm64-apple-macosx/debug/ShotX.build/ShortcutRecorder.swift.o",
         "/Users/mac/.superset/projects/shotx/.build/arm64-apple-macosx/debug/ShotX.build/ShortcutStore.swift.o",
+        "/Users/mac/.superset/projects/shotx/.build/arm64-apple-macosx/debug/ShotX.build/SoundEffect.swift.o",
         "/Users/mac/.superset/projects/shotx/.build/arm64-apple-macosx/debug/ShotX.build/WindowCapture.swift.o",
         "/Users/mac/.superset/projects/shotx/.build/arm64-apple-macosx/debug/ShotX.build/main.swift.o"
       ],
@@ -205,6 +240,10 @@
         },
         {
           "kind" : "file",
+          "name" : "/Users/mac/.superset/projects/shotx/.build/arm64-apple-macosx/debug/ShotX.build/GIFConverter.swift.o"
+        },
+        {
+          "kind" : "file",
           "name" : "/Users/mac/.superset/projects/shotx/.build/arm64-apple-macosx/debug/ShotX.build/HistoryStore.swift.o"
         },
         {
@@ -241,7 +280,27 @@
         },
         {
           "kind" : "file",
+          "name" : "/Users/mac/.superset/projects/shotx/.build/arm64-apple-macosx/debug/ShotX.build/RecordingCompletePopup.swift.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/mac/.superset/projects/shotx/.build/arm64-apple-macosx/debug/ShotX.build/RecordingController.swift.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/mac/.superset/projects/shotx/.build/arm64-apple-macosx/debug/ShotX.build/RecordingFrameOverlay.swift.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/mac/.superset/projects/shotx/.build/arm64-apple-macosx/debug/ShotX.build/RecordingUI.swift.o"
+        },
+        {
+          "kind" : "file",
           "name" : "/Users/mac/.superset/projects/shotx/.build/arm64-apple-macosx/debug/ShotX.build/ScreenCapture.swift.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/mac/.superset/projects/shotx/.build/arm64-apple-macosx/debug/ShotX.build/ScreenRecorder.swift.o"
         },
         {
           "kind" : "file",
@@ -254,6 +313,10 @@
         {
           "kind" : "file",
           "name" : "/Users/mac/.superset/projects/shotx/.build/arm64-apple-macosx/debug/ShotX.build/ShortcutStore.swift.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/mac/.superset/projects/shotx/.build/arm64-apple-macosx/debug/ShotX.build/SoundEffect.swift.o"
         },
         {
           "kind" : "file",
@@ -274,6 +337,7 @@
         "/Users/mac/.superset/projects/shotx/Sources/ShotX/AppDelegate.swift",
         "/Users/mac/.superset/projects/shotx/Sources/ShotX/DesktopIcons.swift",
         "/Users/mac/.superset/projects/shotx/Sources/ShotX/FloatingPanels.swift",
+        "/Users/mac/.superset/projects/shotx/Sources/ShotX/GIFConverter.swift",
         "/Users/mac/.superset/projects/shotx/Sources/ShotX/HistoryStore.swift",
         "/Users/mac/.superset/projects/shotx/Sources/ShotX/HotKeyManager.swift",
         "/Users/mac/.superset/projects/shotx/Sources/ShotX/ImageSaver.swift",
@@ -283,10 +347,16 @@
         "/Users/mac/.superset/projects/shotx/Sources/ShotX/OverlayWindow.swift",
         "/Users/mac/.superset/projects/shotx/Sources/ShotX/PinnedImage.swift",
         "/Users/mac/.superset/projects/shotx/Sources/ShotX/PostCapturePopup.swift",
+        "/Users/mac/.superset/projects/shotx/Sources/ShotX/RecordingCompletePopup.swift",
+        "/Users/mac/.superset/projects/shotx/Sources/ShotX/RecordingController.swift",
+        "/Users/mac/.superset/projects/shotx/Sources/ShotX/RecordingFrameOverlay.swift",
+        "/Users/mac/.superset/projects/shotx/Sources/ShotX/RecordingUI.swift",
         "/Users/mac/.superset/projects/shotx/Sources/ShotX/ScreenCapture.swift",
+        "/Users/mac/.superset/projects/shotx/Sources/ShotX/ScreenRecorder.swift",
         "/Users/mac/.superset/projects/shotx/Sources/ShotX/SelectionView.swift",
         "/Users/mac/.superset/projects/shotx/Sources/ShotX/ShortcutRecorder.swift",
         "/Users/mac/.superset/projects/shotx/Sources/ShotX/ShortcutStore.swift",
+        "/Users/mac/.superset/projects/shotx/Sources/ShotX/SoundEffect.swift",
         "/Users/mac/.superset/projects/shotx/Sources/ShotX/WindowCapture.swift",
         "/Users/mac/.superset/projects/shotx/Sources/ShotX/main.swift"
       ],
@@ -311,6 +381,7 @@
       "/Users/mac/.superset/projects/shotx/Sources/ShotX/AppDelegate.swift",
       "/Users/mac/.superset/projects/shotx/Sources/ShotX/DesktopIcons.swift",
       "/Users/mac/.superset/projects/shotx/Sources/ShotX/FloatingPanels.swift",
+      "/Users/mac/.superset/projects/shotx/Sources/ShotX/GIFConverter.swift",
       "/Users/mac/.superset/projects/shotx/Sources/ShotX/HistoryStore.swift",
       "/Users/mac/.superset/projects/shotx/Sources/ShotX/HotKeyManager.swift",
       "/Users/mac/.superset/projects/shotx/Sources/ShotX/ImageSaver.swift",
@@ -320,10 +391,16 @@
       "/Users/mac/.superset/projects/shotx/Sources/ShotX/OverlayWindow.swift",
       "/Users/mac/.superset/projects/shotx/Sources/ShotX/PinnedImage.swift",
       "/Users/mac/.superset/projects/shotx/Sources/ShotX/PostCapturePopup.swift",
+      "/Users/mac/.superset/projects/shotx/Sources/ShotX/RecordingCompletePopup.swift",
+      "/Users/mac/.superset/projects/shotx/Sources/ShotX/RecordingController.swift",
+      "/Users/mac/.superset/projects/shotx/Sources/ShotX/RecordingFrameOverlay.swift",
+      "/Users/mac/.superset/projects/shotx/Sources/ShotX/RecordingUI.swift",
       "/Users/mac/.superset/projects/shotx/Sources/ShotX/ScreenCapture.swift",
+      "/Users/mac/.superset/projects/shotx/Sources/ShotX/ScreenRecorder.swift",
       "/Users/mac/.superset/projects/shotx/Sources/ShotX/SelectionView.swift",
       "/Users/mac/.superset/projects/shotx/Sources/ShotX/ShortcutRecorder.swift",
       "/Users/mac/.superset/projects/shotx/Sources/ShotX/ShortcutStore.swift",
+      "/Users/mac/.superset/projects/shotx/Sources/ShotX/SoundEffect.swift",
       "/Users/mac/.superset/projects/shotx/Sources/ShotX/WindowCapture.swift",
       "/Users/mac/.superset/projects/shotx/Sources/ShotX/main.swift",
       "-I",
@@ -430,6 +507,10 @@
         },
         {
           "kind" : "file",
+          "name" : "/Users/mac/.superset/projects/shotx/Sources/ShotX/GIFConverter.swift"
+        },
+        {
+          "kind" : "file",
           "name" : "/Users/mac/.superset/projects/shotx/Sources/ShotX/HistoryStore.swift"
         },
         {
@@ -466,7 +547,27 @@
         },
         {
           "kind" : "file",
+          "name" : "/Users/mac/.superset/projects/shotx/Sources/ShotX/RecordingCompletePopup.swift"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/mac/.superset/projects/shotx/Sources/ShotX/RecordingController.swift"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/mac/.superset/projects/shotx/Sources/ShotX/RecordingFrameOverlay.swift"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/mac/.superset/projects/shotx/Sources/ShotX/RecordingUI.swift"
+        },
+        {
+          "kind" : "file",
           "name" : "/Users/mac/.superset/projects/shotx/Sources/ShotX/ScreenCapture.swift"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/mac/.superset/projects/shotx/Sources/ShotX/ScreenRecorder.swift"
         },
         {
           "kind" : "file",
@@ -479,6 +580,10 @@
         {
           "kind" : "file",
           "name" : "/Users/mac/.superset/projects/shotx/Sources/ShotX/ShortcutStore.swift"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/mac/.superset/projects/shotx/Sources/ShotX/SoundEffect.swift"
         },
         {
           "kind" : "file",
@@ -520,6 +625,10 @@
         },
         {
           "kind" : "file",
+          "name" : "/Users/mac/.superset/projects/shotx/.build/arm64-apple-macosx/debug/ShotX.build/GIFConverter.swift.o"
+        },
+        {
+          "kind" : "file",
           "name" : "/Users/mac/.superset/projects/shotx/.build/arm64-apple-macosx/debug/ShotX.build/HistoryStore.swift.o"
         },
         {
@@ -556,7 +665,27 @@
         },
         {
           "kind" : "file",
+          "name" : "/Users/mac/.superset/projects/shotx/.build/arm64-apple-macosx/debug/ShotX.build/RecordingCompletePopup.swift.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/mac/.superset/projects/shotx/.build/arm64-apple-macosx/debug/ShotX.build/RecordingController.swift.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/mac/.superset/projects/shotx/.build/arm64-apple-macosx/debug/ShotX.build/RecordingFrameOverlay.swift.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/mac/.superset/projects/shotx/.build/arm64-apple-macosx/debug/ShotX.build/RecordingUI.swift.o"
+        },
+        {
+          "kind" : "file",
           "name" : "/Users/mac/.superset/projects/shotx/.build/arm64-apple-macosx/debug/ShotX.build/ScreenCapture.swift.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/mac/.superset/projects/shotx/.build/arm64-apple-macosx/debug/ShotX.build/ScreenRecorder.swift.o"
         },
         {
           "kind" : "file",
@@ -569,6 +698,10 @@
         {
           "kind" : "file",
           "name" : "/Users/mac/.superset/projects/shotx/.build/arm64-apple-macosx/debug/ShotX.build/ShortcutStore.swift.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/mac/.superset/projects/shotx/.build/arm64-apple-macosx/debug/ShotX.build/SoundEffect.swift.o"
         },
         {
           "kind" : "file",

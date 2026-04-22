@@ -2,11 +2,47 @@ import Cocoa
 import Combine
 
 struct CaptureEntry: Identifiable, Codable, Equatable {
+    enum Kind: String, Codable {
+        case image, video, gif
+    }
+
     let id: UUID
     let filename: String
     let createdAt: Date
     let width: CGFloat
     let height: CGFloat
+    let kind: Kind
+    let duration: TimeInterval?
+
+    init(
+        id: UUID = UUID(),
+        filename: String,
+        createdAt: Date,
+        width: CGFloat,
+        height: CGFloat,
+        kind: Kind = .image,
+        duration: TimeInterval? = nil
+    ) {
+        self.id = id
+        self.filename = filename
+        self.createdAt = createdAt
+        self.width = width
+        self.height = height
+        self.kind = kind
+        self.duration = duration
+    }
+
+    init(from decoder: Decoder) throws {
+        let c = try decoder.container(keyedBy: CodingKeys.self)
+        id = try c.decode(UUID.self, forKey: .id)
+        filename = try c.decode(String.self, forKey: .filename)
+        createdAt = try c.decode(Date.self, forKey: .createdAt)
+        width = try c.decode(CGFloat.self, forKey: .width)
+        height = try c.decode(CGFloat.self, forKey: .height)
+        // Backwards compat: older entries lack `kind` and `duration`.
+        kind = (try? c.decode(Kind.self, forKey: .kind)) ?? .image
+        duration = try? c.decode(TimeInterval.self, forKey: .duration)
+    }
 }
 
 final class HistoryStore: ObservableObject {
@@ -43,15 +79,61 @@ final class HistoryStore: ObservableObject {
     func add(_ image: NSImage) -> CaptureEntry? {
         guard let png = ImageSaver.pngData(from: image) else { return nil }
         let entry = CaptureEntry(
-            id: UUID(),
             filename: "\(UUID().uuidString).png",
             createdAt: Date(),
             width: image.size.width,
-            height: image.size.height
+            height: image.size.height,
+            kind: .image
         )
         let url = historyDir.appendingPathComponent(entry.filename)
         do { try png.write(to: url) } catch { return nil }
+        register(entry)
+        return entry
+    }
 
+    @discardableResult
+    func add(videoAt sourceURL: URL, duration: TimeInterval, dimensions: CGSize) -> CaptureEntry? {
+        let entry = CaptureEntry(
+            filename: "\(UUID().uuidString).mp4",
+            createdAt: Date(),
+            width: dimensions.width,
+            height: dimensions.height,
+            kind: .video,
+            duration: duration
+        )
+        return moveIntoHistory(sourceURL: sourceURL, entry: entry)
+    }
+
+    @discardableResult
+    func add(gifAt sourceURL: URL, duration: TimeInterval, dimensions: CGSize) -> CaptureEntry? {
+        let entry = CaptureEntry(
+            filename: "\(UUID().uuidString).gif",
+            createdAt: Date(),
+            width: dimensions.width,
+            height: dimensions.height,
+            kind: .gif,
+            duration: duration
+        )
+        return moveIntoHistory(sourceURL: sourceURL, entry: entry)
+    }
+
+    private func moveIntoHistory(sourceURL: URL, entry: CaptureEntry) -> CaptureEntry? {
+        let dest = historyDir.appendingPathComponent(entry.filename)
+        do {
+            if FileManager.default.fileExists(atPath: dest.path) {
+                try FileManager.default.removeItem(at: dest)
+            }
+            try FileManager.default.moveItem(at: sourceURL, to: dest)
+        } catch {
+            // Fall back to copy if move fails (different volumes)
+            do { try FileManager.default.copyItem(at: sourceURL, to: dest) }
+            catch { return nil }
+        }
+        register(entry)
+        return entry
+    }
+
+    private func register(_ entry: CaptureEntry) {
         entries.insert(entry, at: 0)
         if entries.count > maxEntries {
             for old in entries.suffix(from: maxEntries) {
@@ -60,7 +142,6 @@ final class HistoryStore: ObservableObject {
             entries = Array(entries.prefix(maxEntries))
         }
         save()
-        return entry
     }
 
     func fileURL(for entry: CaptureEntry) -> URL {
@@ -68,7 +149,13 @@ final class HistoryStore: ObservableObject {
     }
 
     func image(for entry: CaptureEntry) -> NSImage? {
-        NSImage(contentsOf: fileURL(for: entry))
+        let url = fileURL(for: entry)
+        switch entry.kind {
+        case .image, .gif:
+            return NSImage(contentsOf: url)
+        case .video:
+            return VideoThumbnail.firstFrame(of: url)
+        }
     }
 
     func remove(_ entry: CaptureEntry) {

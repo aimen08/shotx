@@ -32,6 +32,12 @@
     "swiftmodule": "/Users/mac/.superset/projects/shotx/.build/arm64-apple-macosx/debug/ShotX.build/FloatingPanels~partial.swiftmodule",
     "swift-dependencies": "/Users/mac/.superset/projects/shotx/.build/arm64-apple-macosx/debug/ShotX.build/FloatingPanels.swiftdeps"
   },
+  "/Users/mac/.superset/projects/shotx/Sources/ShotX/GIFConverter.swift": {
+    "dependencies": "/Users/mac/.superset/projects/shotx/.build/arm64-apple-macosx/debug/ShotX.build/GIFConverter.d",
+    "object": "/Users/mac/.superset/projects/shotx/.build/arm64-apple-macosx/debug/ShotX.build/GIFConverter.swift.o",
+    "swiftmodule": "/Users/mac/.superset/projects/shotx/.build/arm64-apple-macosx/debug/ShotX.build/GIFConverter~partial.swiftmodule",
+    "swift-dependencies": "/Users/mac/.superset/projects/shotx/.build/arm64-apple-macosx/debug/ShotX.build/GIFConverter.swiftdeps"
+  },
   "/Users/mac/.superset/projects/shotx/Sources/ShotX/HistoryStore.swift": {
     "dependencies": "/Users/mac/.superset/projects/shotx/.build/arm64-apple-macosx/debug/ShotX.build/HistoryStore.d",
     "object": "/Users/mac/.superset/projects/shotx/.build/arm64-apple-macosx/debug/ShotX.build/HistoryStore.swift.o",
@@ -86,11 +92,41 @@
     "swiftmodule": "/Users/mac/.superset/projects/shotx/.build/arm64-apple-macosx/debug/ShotX.build/PostCapturePopup~partial.swiftmodule",
     "swift-dependencies": "/Users/mac/.superset/projects/shotx/.build/arm64-apple-macosx/debug/ShotX.build/PostCapturePopup.swiftdeps"
   },
+  "/Users/mac/.superset/projects/shotx/Sources/ShotX/RecordingCompletePopup.swift": {
+    "dependencies": "/Users/mac/.superset/projects/shotx/.build/arm64-apple-macosx/debug/ShotX.build/RecordingCompletePopup.d",
+    "object": "/Users/mac/.superset/projects/shotx/.build/arm64-apple-macosx/debug/ShotX.build/RecordingCompletePopup.swift.o",
+    "swiftmodule": "/Users/mac/.superset/projects/shotx/.build/arm64-apple-macosx/debug/ShotX.build/RecordingCompletePopup~partial.swiftmodule",
+    "swift-dependencies": "/Users/mac/.superset/projects/shotx/.build/arm64-apple-macosx/debug/ShotX.build/RecordingCompletePopup.swiftdeps"
+  },
+  "/Users/mac/.superset/projects/shotx/Sources/ShotX/RecordingController.swift": {
+    "dependencies": "/Users/mac/.superset/projects/shotx/.build/arm64-apple-macosx/debug/ShotX.build/RecordingController.d",
+    "object": "/Users/mac/.superset/projects/shotx/.build/arm64-apple-macosx/debug/ShotX.build/RecordingController.swift.o",
+    "swiftmodule": "/Users/mac/.superset/projects/shotx/.build/arm64-apple-macosx/debug/ShotX.build/RecordingController~partial.swiftmodule",
+    "swift-dependencies": "/Users/mac/.superset/projects/shotx/.build/arm64-apple-macosx/debug/ShotX.build/RecordingController.swiftdeps"
+  },
+  "/Users/mac/.superset/projects/shotx/Sources/ShotX/RecordingFrameOverlay.swift": {
+    "dependencies": "/Users/mac/.superset/projects/shotx/.build/arm64-apple-macosx/debug/ShotX.build/RecordingFrameOverlay.d",
+    "object": "/Users/mac/.superset/projects/shotx/.build/arm64-apple-macosx/debug/ShotX.build/RecordingFrameOverlay.swift.o",
+    "swiftmodule": "/Users/mac/.superset/projects/shotx/.build/arm64-apple-macosx/debug/ShotX.build/RecordingFrameOverlay~partial.swiftmodule",
+    "swift-dependencies": "/Users/mac/.superset/projects/shotx/.build/arm64-apple-macosx/debug/ShotX.build/RecordingFrameOverlay.swiftdeps"
+  },
+  "/Users/mac/.superset/projects/shotx/Sources/ShotX/RecordingUI.swift": {
+    "dependencies": "/Users/mac/.superset/projects/shotx/.build/arm64-apple-macosx/debug/ShotX.build/RecordingUI.d",
+    "object": "/Users/mac/.superset/projects/shotx/.build/arm64-apple-macosx/debug/ShotX.build/RecordingUI.swift.o",
+    "swiftmodule": "/Users/mac/.superset/projects/shotx/.build/arm64-apple-macosx/debug/ShotX.build/RecordingUI~partial.swiftmodule",
+    "swift-dependencies": "/Users/mac/.superset/projects/shotx/.build/arm64-apple-macosx/debug/ShotX.build/RecordingUI.swiftdeps"
+  },
   "/Users/mac/.superset/projects/shotx/Sources/ShotX/ScreenCapture.swift": {
     "dependencies": "/Users/mac/.superset/projects/shotx/.build/arm64-apple-macosx/debug/ShotX.build/ScreenCapture.d",
     "object": "/Users/mac/.superset/projects/shotx/.build/arm64-apple-macosx/debug/ShotX.build/ScreenCapture.swift.o",
     "swiftmodule": "/Users/mac/.superset/projects/shotx/.build/arm64-apple-macosx/debug/ShotX.build/ScreenCapture~partial.swiftmodule",
     "swift-dependencies": "/Users/mac/.superset/projects/shotx/.build/arm64-apple-macosx/debug/ShotX.build/ScreenCapture.swiftdeps"
+  },
+  "/Users/mac/.superset/projects/shotx/Sources/ShotX/ScreenRecorder.swift": {
+    "dependencies": "/Users/mac/.superset/projects/shotx/.build/arm64-apple-macosx/debug/ShotX.build/ScreenRecorder.d",
+    "object": "/Users/mac/.superset/projects/shotx/.build/arm64-apple-macosx/debug/ShotX.build/ScreenRecorder.swift.o",
+    "swiftmodule": "/Users/mac/.superset/projects/shotx/.build/arm64-apple-macosx/debug/ShotX.build/ScreenRecorder~partial.swiftmodule",
+    "swift-dependencies": "/Users/mac/.superset/projects/shotx/.build/arm64-apple-macosx/debug/ShotX.build/ScreenRecorder.swiftdeps"
   },
   "/Users/mac/.superset/projects/shotx/Sources/ShotX/SelectionView.swift": {
     "dependencies": "/Users/mac/.superset/projects/shotx/.build/arm64-apple-macosx/debug/ShotX.build/SelectionView.d",
@@ -109,6 +145,12 @@
     "object": "/Users/mac/.superset/projects/shotx/.build/arm64-apple-macosx/debug/ShotX.build/ShortcutStore.swift.o",
     "swiftmodule": "/Users/mac/.superset/projects/shotx/.build/arm64-apple-macosx/debug/ShotX.build/ShortcutStore~partial.swiftmodule",
     "swift-dependencies": "/Users/mac/.superset/projects/shotx/.build/arm64-apple-macosx/debug/ShotX.build/ShortcutStore.swiftdeps"
+  },
+  "/Users/mac/.superset/projects/shotx/Sources/ShotX/SoundEffect.swift": {
+    "dependencies": "/Users/mac/.superset/projects/shotx/.build/arm64-apple-macosx/debug/ShotX.build/SoundEffect.d",
+    "object": "/Users/mac/.superset/projects/shotx/.build/arm64-apple-macosx/debug/ShotX.build/SoundEffect.swift.o",
+    "swiftmodule": "/Users/mac/.superset/projects/shotx/.build/arm64-apple-macosx/debug/ShotX.build/SoundEffect~partial.swiftmodule",
+    "swift-dependencies": "/Users/mac/.superset/projects/shotx/.build/arm64-apple-macosx/debug/ShotX.build/SoundEffect.swiftdeps"
   },
   "/Users/mac/.superset/projects/shotx/Sources/ShotX/WindowCapture.swift": {
     "dependencies": "/Users/mac/.superset/projects/shotx/.build/arm64-apple-macosx/debug/ShotX.build/WindowCapture.d",

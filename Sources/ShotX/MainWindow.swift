@@ -117,6 +117,8 @@ struct HistoryCard: View {
     @State private var image: NSImage?
     @State private var hovering = false
 
+    private var isMedia: Bool { entry.kind != .image }
+
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
             thumbnailArea
@@ -125,14 +127,23 @@ struct HistoryCard: View {
         .onAppear { image = history.image(for: entry) }
         .onHover { hovering = $0 }
         .animation(.easeOut(duration: 0.15), value: hovering)
-        .contextMenu {
+        .contextMenu { contextMenuContent }
+    }
+
+    @ViewBuilder
+    private var contextMenuContent: some View {
+        if isMedia {
+            Button("Open") { play() }
+            Button("Copy File") { copyFile() }
+            Button("Save to Desktop") { saveFile() }
+        } else {
             Button("Edit…") { edit() }
             Button("Copy") { copy() }
             Button("Save to Desktop") { saveToDesktop() }
-            Button("Reveal in Finder") { reveal() }
-            Divider()
-            Button("Delete", role: .destructive) { history.remove(entry) }
         }
+        Button("Reveal in Finder") { reveal() }
+        Divider()
+        Button("Delete", role: .destructive) { history.remove(entry) }
     }
 
     private var thumbnailArea: some View {
@@ -156,6 +167,13 @@ struct HistoryCard: View {
                     .padding(8)
             }
 
+            if isMedia {
+                Image(systemName: "play.circle.fill")
+                    .font(.system(size: 30, weight: .semibold))
+                    .foregroundStyle(.white.opacity(0.92))
+                    .shadow(color: .black.opacity(0.55), radius: 4, y: 1)
+            }
+
             if hovering {
                 LinearGradient(
                     colors: [.clear, .black.opacity(0.55)],
@@ -165,12 +183,20 @@ struct HistoryCard: View {
                 .clipShape(RoundedRectangle(cornerRadius: 10))
 
                 HStack(spacing: 8) {
-                    HistoryActionButton(icon: "pencil.tip", tooltip: "Edit", action: edit)
-                    HistoryActionButton(icon: "doc.on.doc", tooltip: "Copy", action: copy)
-                    HistoryActionButton(icon: "square.and.arrow.down", tooltip: "Save to Desktop", action: saveToDesktop)
+                    if isMedia {
+                        HistoryActionButton(icon: "play.fill", tooltip: "Play", action: play)
+                        HistoryActionButton(icon: "doc.on.doc", tooltip: "Copy File", action: copyFile)
+                        HistoryActionButton(icon: "square.and.arrow.down", tooltip: "Save to Desktop", action: saveFile)
+                    } else {
+                        HistoryActionButton(icon: "pencil.tip", tooltip: "Edit", action: edit)
+                        HistoryActionButton(icon: "doc.on.doc", tooltip: "Copy", action: copy)
+                        HistoryActionButton(icon: "square.and.arrow.down", tooltip: "Save to Desktop", action: saveToDesktop)
+                    }
                 }
                 .padding(.bottom, 10)
             }
+
+            kindBadge
         }
         .frame(height: 140)
         .overlay(
@@ -178,6 +204,33 @@ struct HistoryCard: View {
                 .strokeBorder(Color.primary.opacity(0.1), lineWidth: 1)
         )
         .shadow(color: .black.opacity(hovering ? 0.18 : 0.0), radius: 10, y: 4)
+        .onTapGesture(count: 2) {
+            if isMedia { play() } else { copy() }
+        }
+    }
+
+    @ViewBuilder
+    private var kindBadge: some View {
+        if entry.kind == .gif {
+            badge(text: "GIF", color: .systemPurple)
+        } else if entry.kind == .video, let duration = entry.duration {
+            badge(text: formatDuration(duration), color: .systemRed)
+        }
+    }
+
+    private func badge(text: String, color: NSColor) -> some View {
+        Text(text)
+            .font(.system(size: 9.5, weight: .heavy))
+            .foregroundStyle(.white)
+            .padding(.horizontal, 6)
+            .padding(.vertical, 2.5)
+            .background(
+                Capsule().fill(Color(nsColor: color))
+            )
+            .shadow(color: .black.opacity(0.4), radius: 2, y: 1)
+            .padding(7)
+            .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
+            .allowsHitTesting(false)
     }
 
     private var footer: some View {
@@ -199,6 +252,8 @@ struct HistoryCard: View {
         .padding(.horizontal, 2)
     }
 
+    // MARK: - Actions (image)
+
     private func copy() {
         guard let image = image else { return }
         ImageSaver.copyToClipboard(image)
@@ -215,8 +270,42 @@ struct HistoryCard: View {
         appDelegate.openAnnotator(with: image)
     }
 
+    // MARK: - Actions (video / gif)
+
+    private func play() {
+        NSWorkspace.shared.open(history.fileURL(for: entry))
+    }
+
+    private func copyFile() {
+        let pb = NSPasteboard.general
+        pb.clearContents()
+        pb.writeObjects([history.fileURL(for: entry) as NSURL])
+    }
+
+    private func saveFile() {
+        let url = history.fileURL(for: entry)
+        let desktop = FileManager.default.urls(for: .desktopDirectory, in: .userDomainMask).first!
+        let formatter = DateFormatter()
+        formatter.dateFormat = "yyyy-MM-dd 'at' HH.mm.ss"
+        let ext = url.pathExtension.isEmpty ? "mp4" : url.pathExtension
+        let dest = desktop.appendingPathComponent("ShotX Recording \(formatter.string(from: Date())).\(ext)")
+        do {
+            try FileManager.default.copyItem(at: url, to: dest)
+            NSWorkspace.shared.activateFileViewerSelecting([dest])
+        } catch { /* silent */ }
+    }
+
+    // MARK: - Shared
+
     private func reveal() {
         NSWorkspace.shared.activateFileViewerSelecting([history.fileURL(for: entry)])
+    }
+
+    private func formatDuration(_ t: TimeInterval) -> String {
+        let total = Int(t)
+        let m = total / 60
+        let s = total % 60
+        return String(format: "%d:%02d", m, s)
     }
 }
 

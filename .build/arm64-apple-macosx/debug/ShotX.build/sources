@@ -3,6 +3,7 @@
 /Users/mac/.superset/projects/shotx/Sources/ShotX/AppDelegate.swift
 /Users/mac/.superset/projects/shotx/Sources/ShotX/DesktopIcons.swift
 /Users/mac/.superset/projects/shotx/Sources/ShotX/FloatingPanels.swift
+/Users/mac/.superset/projects/shotx/Sources/ShotX/GIFConverter.swift
 /Users/mac/.superset/projects/shotx/Sources/ShotX/HistoryStore.swift
 /Users/mac/.superset/projects/shotx/Sources/ShotX/HotKeyManager.swift
 /Users/mac/.superset/projects/shotx/Sources/ShotX/ImageSaver.swift
@@ -12,9 +13,15 @@
 /Users/mac/.superset/projects/shotx/Sources/ShotX/OverlayWindow.swift
 /Users/mac/.superset/projects/shotx/Sources/ShotX/PinnedImage.swift
 /Users/mac/.superset/projects/shotx/Sources/ShotX/PostCapturePopup.swift
+/Users/mac/.superset/projects/shotx/Sources/ShotX/RecordingCompletePopup.swift
+/Users/mac/.superset/projects/shotx/Sources/ShotX/RecordingController.swift
+/Users/mac/.superset/projects/shotx/Sources/ShotX/RecordingFrameOverlay.swift
+/Users/mac/.superset/projects/shotx/Sources/ShotX/RecordingUI.swift
 /Users/mac/.superset/projects/shotx/Sources/ShotX/ScreenCapture.swift
+/Users/mac/.superset/projects/shotx/Sources/ShotX/ScreenRecorder.swift
 /Users/mac/.superset/projects/shotx/Sources/ShotX/SelectionView.swift
 /Users/mac/.superset/projects/shotx/Sources/ShotX/ShortcutRecorder.swift
 /Users/mac/.superset/projects/shotx/Sources/ShotX/ShortcutStore.swift
+/Users/mac/.superset/projects/shotx/Sources/ShotX/SoundEffect.swift
 /Users/mac/.superset/projects/shotx/Sources/ShotX/WindowCapture.swift
 /Users/mac/.superset/projects/shotx/Sources/ShotX/main.swift

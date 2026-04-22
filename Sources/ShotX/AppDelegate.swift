@@ -78,6 +78,24 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
 
         menu.addItem(.separator())
 
+        let recording = MainActor.assumeIsolated { RecordingController.shared.isRecording }
+        if recording {
+            let stop = menuItem(
+                title: "Stop Recording",
+                symbol: "stop.fill",
+                action: #selector(stopRecording)
+            )
+            menu.addItem(stop)
+        } else {
+            menu.addItem(menuItem(
+                title: "Record Screen",
+                symbol: "video",
+                action: #selector(recordScreen)
+            ))
+        }
+
+        menu.addItem(.separator())
+
         let timerItem = NSMenuItem(title: "Self-Timer", action: nil, keyEquivalent: "")
         timerItem.image = NSImage(systemSymbolName: "timer", accessibilityDescription: nil)
         let timerMenu = NSMenu()
@@ -282,6 +300,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
             if let rect = rect, let screen = screen {
                 LastCaptureStore.save(rect: rect, screen: screen)
             }
+            SoundEffect.shared.playShutter()
             HistoryStore.shared.add(image)
             PinnedImageController.shared.pin(image)
         }
@@ -289,6 +308,18 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
 
     @objc private func toggleDesktopIcons() {
         DesktopIcons.toggle()
+    }
+
+    @objc private func recordScreen() {
+        MainActor.assumeIsolated {
+            RecordingController.shared.startRecordingFlow()
+        }
+    }
+
+    @objc private func stopRecording() {
+        MainActor.assumeIsolated {
+            RecordingController.shared.stopRecording()
+        }
     }
 
     @objc private func showAllInOne() {
@@ -341,6 +372,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
     // MARK: - Shared post-capture
 
     private func handleCapturedImage(_ image: NSImage) {
+        SoundEffect.shared.playShutter()
         HistoryStore.shared.add(image)
         ImageSaver.copyToClipboard(image)
         showPostCapturePopup(for: image)
