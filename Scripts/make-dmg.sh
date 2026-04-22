@@ -5,7 +5,7 @@ set -euo pipefail
 cd "$(dirname "$0")/.."
 
 APP_NAME="ShotX"
-VERSION="1.0"
+VERSION="${VERSION:-1.0}"
 APP_PATH="dist/$APP_NAME.app"
 DMG_PATH="dist/$APP_NAME-$VERSION.dmg"
 STAGING="dist/dmg-staging"

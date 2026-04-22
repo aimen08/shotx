@@ -6,8 +6,8 @@ cd "$(dirname "$0")/.."
 
 APP_NAME="ShotX"
 BUNDLE_ID="com.shotx.app"
-VERSION="1.0"
-BUILD_NUMBER="1"
+VERSION="${VERSION:-1.0}"
+BUILD_NUMBER="${BUILD_NUMBER:-1}"
 
 DIST="dist"
 APP="$DIST/$APP_NAME.app"

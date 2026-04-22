@@ -13,11 +13,43 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
     private var countdownController: CountdownController?
     private var timerFrameOverlay: RecordingFrameOverlay?
     private var windowCaptureController: WindowCaptureController?
+    private var permissionController: PermissionPromptController?
     private var shortcutCancellable: AnyCancellable?
 
     func applicationDidFinishLaunching(_ notification: Notification) {
         setupStatusBar()
         setupHotKey()
+
+        // Show the permissions prompt on launch if Screen Recording isn't granted.
+        // Slight delay so the menu bar icon appears first and gives the user
+        // visual context that the app launched.
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.4) { [weak self] in
+            MainActor.assumeIsolated {
+                if !Permissions.screenRecordingGranted {
+                    self?.showPermissionPrompt()
+                }
+            }
+        }
+    }
+
+    @discardableResult
+    private func ensurePermissionOrPrompt() -> Bool {
+        if Permissions.screenRecordingGranted { return true }
+        showPermissionPrompt()
+        return false
+    }
+
+    private func showPermissionPrompt() {
+        MainActor.assumeIsolated {
+            if permissionController == nil {
+                permissionController = PermissionPromptController()
+            }
+            permissionController?.show()
+        }
+    }
+
+    @objc private func openPermissions() {
+        showPermissionPrompt()
     }
 
     // MARK: - Status bar
@@ -152,6 +184,16 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
 
         menu.addItem(.separator())
 
+        let permissionsItem = menuItem(
+            title: "Permissions…",
+            symbol: "lock.shield",
+            action: #selector(openPermissions)
+        )
+        if !Permissions.screenRecordingGranted {
+            permissionsItem.title = "Permissions Needed…"
+        }
+        menu.addItem(permissionsItem)
+
         menu.addItem(menuItem(
             title: "About ShotX",
             symbol: nil,
@@ -221,6 +263,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
 
     @objc func captureNow() {
         guard overlayController == nil else { return }
+        guard ensurePermissionOrPrompt() else { return }
         let controller = OverlayController()
         overlayController = controller
         controller.begin { [weak self] image, rect, screen in
@@ -234,6 +277,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
     }
 
     @objc private func captureFullscreen() {
+        guard ensurePermissionOrPrompt() else { return }
         let mouseLoc = NSEvent.mouseLocation
         let screen = NSScreen.screens.first(where: { $0.frame.contains(mouseLoc) }) ?? NSScreen.main
         guard let screen = screen else { return }
@@ -248,6 +292,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
     }
 
     @objc private func capturePreviousArea() {
+        guard ensurePermissionOrPrompt() else { return }
         guard let stored = LastCaptureStore.load() else {
             NSSound.beep()
             return
@@ -263,6 +308,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
     @objc private func captureAfterTimer(_ sender: NSMenuItem) {
         let seconds = sender.tag
         guard overlayController == nil else { return }
+        guard ensurePermissionOrPrompt() else { return }
 
         let controller = OverlayController()
         overlayController = controller
@@ -305,6 +351,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
 
     @objc private func captureWindow() {
         guard windowCaptureController == nil else { return }
+        guard ensurePermissionOrPrompt() else { return }
         let controller = WindowCaptureController()
         windowCaptureController = controller
         controller.begin { [weak self] image in
@@ -316,6 +363,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
 
     @objc private func pinToScreen() {
         guard overlayController == nil else { return }
+        guard ensurePermissionOrPrompt() else { return }
         let controller = OverlayController()
         overlayController = controller
         controller.begin { [weak self] image, rect, screen in
@@ -335,6 +383,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
     }
 
     @objc private func recordScreen() {
+        guard ensurePermissionOrPrompt() else { return }
         MainActor.assumeIsolated {
             RecordingController.shared.startRecordingFlow()
         }

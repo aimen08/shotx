@@ -129,3 +129,10 @@ guard iconutil.terminationStatus == 0 else {
     exit(1)
 }
 print("✓ \(icnsPath)")
+
+// Also write a single PNG outside the iconset for use in README/docs.
+let readmeIconPath = "\(resourcesDir)/icon.png"
+if let pngData = renderPNG(size: 512) {
+    try? pngData.write(to: URL(fileURLWithPath: readmeIconPath))
+    print("✓ \(readmeIconPath)")
+}
