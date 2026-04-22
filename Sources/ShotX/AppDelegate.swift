@@ -11,6 +11,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
     private var annotationController: AnnotationWindowController?
     private var mainWindowController: MainWindowController?
     private var countdownController: CountdownController?
+    private var timerFrameOverlay: RecordingFrameOverlay?
     private var windowCaptureController: WindowCaptureController?
     private var shortcutCancellable: AnyCancellable?
 
@@ -200,15 +201,18 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
 
     private func setupHotKey() {
         hotKeyManager = HotKeyManager()
-        registerCurrentShortcut()
+        apply(shortcut: ShortcutStore.shared.shortcut)
+        // @Published fires BEFORE willSet, so reading the property here would still
+        // see the old value. Use the new value from the publisher's output instead.
         shortcutCancellable = ShortcutStore.shared.$shortcut
             .dropFirst()
-            .sink { [weak self] _ in self?.registerCurrentShortcut() }
+            .sink { [weak self] newShortcut in
+                self?.apply(shortcut: newShortcut)
+            }
     }
 
-    private func registerCurrentShortcut() {
-        let s = ShortcutStore.shared.shortcut
-        hotKeyManager.register(keyCode: s.keyCode, modifiers: s.modifiers) { [weak self] in
+    private func apply(shortcut: Shortcut) {
+        hotKeyManager.register(keyCode: shortcut.keyCode, modifiers: shortcut.modifiers) { [weak self] in
             self?.captureNow()
         }
     }
@@ -266,16 +270,36 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
             self?.overlayController = nil
             guard let self = self, let rect = rect, let screen = screen else { return }
 
+            // Show a viewfinder around the picked region so the user knows what's
+            // about to be captured.
+            let frame = RecordingFrameOverlay()
+            frame.show(rect: rect, recording: false)
+            self.timerFrameOverlay = frame
+
             self.countdownController?.cancel()
             let cd = CountdownController()
             self.countdownController = cd
-            cd.start(seconds: seconds) { [weak self] in
-                guard let self = self else { return }
-                self.countdownController = nil
-                guard let image = ScreenCapture.capture(rectInScreenCoords: rect, screen: screen) else { return }
-                LastCaptureStore.save(rect: rect, screen: screen)
-                self.handleCapturedImage(image)
-            }
+            cd.start(
+                seconds: seconds,
+                onCancel: { [weak self] in
+                    self?.timerFrameOverlay?.dismiss()
+                    self?.timerFrameOverlay = nil
+                },
+                onFinish: { [weak self] in
+                    guard let self = self else { return }
+                    self.countdownController = nil
+                    // Dismiss frame overlay and panel before snapping; wait a tick for
+                    // the screen to redraw without our chrome before the capture.
+                    self.timerFrameOverlay?.dismiss()
+                    self.timerFrameOverlay = nil
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.2) { [weak self] in
+                        guard let self = self else { return }
+                        guard let image = ScreenCapture.capture(rectInScreenCoords: rect, screen: screen) else { return }
+                        LastCaptureStore.save(rect: rect, screen: screen)
+                        self.handleCapturedImage(image)
+                    }
+                }
+            )
         }
     }
 

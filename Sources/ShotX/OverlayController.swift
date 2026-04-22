@@ -9,8 +9,9 @@ final class OverlayController {
     func begin(completion: @escaping (NSImage?, CGRect?, NSScreen?) -> Void) {
         self.completion = completion
 
-        NSApp.activate(ignoringOtherApps: true)
-
+        // Order windows on screen FIRST (no activation required for orderFrontRegardless).
+        // For an .accessory app, NSApp.activate can take a beat — doing it before
+        // showing windows produces a noticeable delay between shortcut press and overlay.
         for screen in NSScreen.screens {
             let window = OverlayWindow(
                 screen: screen,
@@ -22,8 +23,12 @@ final class OverlayController {
                 }
             )
             windows.append(window)
-            window.makeKeyAndOrderFront(nil)
+            window.orderFrontRegardless()
         }
+
+        // Then bring the app forward and make one window key for keyboard input.
+        NSApp.activate(ignoringOtherApps: true)
+        windows.first?.makeKey()
 
         // Cursor rects only activate on the key window, and across multiple
         // screens only one window is key. Push the crosshair globally so it

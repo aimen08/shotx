@@ -7,8 +7,10 @@ final class CountdownController {
     private var panel: NSPanel?
     private var timer: Timer?
     private var cancelled = false
+    private var cancelHandler: (() -> Void)?
 
-    func start(seconds initial: Int, onFinish: @escaping () -> Void) {
+    func start(seconds initial: Int, onCancel: (() -> Void)? = nil, onFinish: @escaping () -> Void) {
+        cancelHandler = onCancel
         var remaining = initial
         let state = CountdownState(seconds: remaining)
 
@@ -64,8 +66,11 @@ final class CountdownController {
     }
 
     func cancel() {
+        guard !cancelled else { return }
         cancelled = true
         cleanup()
+        cancelHandler?()
+        cancelHandler = nil
     }
 
     private func cleanup() {

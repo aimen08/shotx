@@ -6,3 +6,5 @@ Packages/
 xcuserdata/
 DerivedData/
 Package.resolved
+dist/
+Resources/AppIcon.iconset/
