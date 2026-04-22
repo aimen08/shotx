@@ -7,7 +7,7 @@ struct Shortcut: Codable, Equatable {
     var modifiers: UInt32
 
     static let `default` = Shortcut(
-        keyCode: UInt32(kVK_ANSI_D),
+        keyCode: UInt32(kVK_ANSI_X),
         modifiers: UInt32(optionKey)
     )
 }
