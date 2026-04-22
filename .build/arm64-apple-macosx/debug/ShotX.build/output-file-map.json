@@ -2,17 +2,41 @@
   "": {
     "swift-dependencies": "/Users/mac/.superset/projects/shotx/.build/arm64-apple-macosx/debug/ShotX.build/master.swiftdeps"
   },
+  "/Users/mac/.superset/projects/shotx/Sources/ShotX/Annotation.swift": {
+    "dependencies": "/Users/mac/.superset/projects/shotx/.build/arm64-apple-macosx/debug/ShotX.build/Annotation.d",
+    "object": "/Users/mac/.superset/projects/shotx/.build/arm64-apple-macosx/debug/ShotX.build/Annotation.swift.o",
+    "swiftmodule": "/Users/mac/.superset/projects/shotx/.build/arm64-apple-macosx/debug/ShotX.build/Annotation~partial.swiftmodule",
+    "swift-dependencies": "/Users/mac/.superset/projects/shotx/.build/arm64-apple-macosx/debug/ShotX.build/Annotation.swiftdeps"
+  },
   "/Users/mac/.superset/projects/shotx/Sources/ShotX/AppDelegate.swift": {
     "dependencies": "/Users/mac/.superset/projects/shotx/.build/arm64-apple-macosx/debug/ShotX.build/AppDelegate.d",
     "object": "/Users/mac/.superset/projects/shotx/.build/arm64-apple-macosx/debug/ShotX.build/AppDelegate.swift.o",
     "swiftmodule": "/Users/mac/.superset/projects/shotx/.build/arm64-apple-macosx/debug/ShotX.build/AppDelegate~partial.swiftmodule",
     "swift-dependencies": "/Users/mac/.superset/projects/shotx/.build/arm64-apple-macosx/debug/ShotX.build/AppDelegate.swiftdeps"
   },
+  "/Users/mac/.superset/projects/shotx/Sources/ShotX/HistoryStore.swift": {
+    "dependencies": "/Users/mac/.superset/projects/shotx/.build/arm64-apple-macosx/debug/ShotX.build/HistoryStore.d",
+    "object": "/Users/mac/.superset/projects/shotx/.build/arm64-apple-macosx/debug/ShotX.build/HistoryStore.swift.o",
+    "swiftmodule": "/Users/mac/.superset/projects/shotx/.build/arm64-apple-macosx/debug/ShotX.build/HistoryStore~partial.swiftmodule",
+    "swift-dependencies": "/Users/mac/.superset/projects/shotx/.build/arm64-apple-macosx/debug/ShotX.build/HistoryStore.swiftdeps"
+  },
   "/Users/mac/.superset/projects/shotx/Sources/ShotX/HotKeyManager.swift": {
     "dependencies": "/Users/mac/.superset/projects/shotx/.build/arm64-apple-macosx/debug/ShotX.build/HotKeyManager.d",
     "object": "/Users/mac/.superset/projects/shotx/.build/arm64-apple-macosx/debug/ShotX.build/HotKeyManager.swift.o",
     "swiftmodule": "/Users/mac/.superset/projects/shotx/.build/arm64-apple-macosx/debug/ShotX.build/HotKeyManager~partial.swiftmodule",
     "swift-dependencies": "/Users/mac/.superset/projects/shotx/.build/arm64-apple-macosx/debug/ShotX.build/HotKeyManager.swiftdeps"
+  },
+  "/Users/mac/.superset/projects/shotx/Sources/ShotX/ImageSaver.swift": {
+    "dependencies": "/Users/mac/.superset/projects/shotx/.build/arm64-apple-macosx/debug/ShotX.build/ImageSaver.d",
+    "object": "/Users/mac/.superset/projects/shotx/.build/arm64-apple-macosx/debug/ShotX.build/ImageSaver.swift.o",
+    "swiftmodule": "/Users/mac/.superset/projects/shotx/.build/arm64-apple-macosx/debug/ShotX.build/ImageSaver~partial.swiftmodule",
+    "swift-dependencies": "/Users/mac/.superset/projects/shotx/.build/arm64-apple-macosx/debug/ShotX.build/ImageSaver.swiftdeps"
+  },
+  "/Users/mac/.superset/projects/shotx/Sources/ShotX/MainWindow.swift": {
+    "dependencies": "/Users/mac/.superset/projects/shotx/.build/arm64-apple-macosx/debug/ShotX.build/MainWindow.d",
+    "object": "/Users/mac/.superset/projects/shotx/.build/arm64-apple-macosx/debug/ShotX.build/MainWindow.swift.o",
+    "swiftmodule": "/Users/mac/.superset/projects/shotx/.build/arm64-apple-macosx/debug/ShotX.build/MainWindow~partial.swiftmodule",
+    "swift-dependencies": "/Users/mac/.superset/projects/shotx/.build/arm64-apple-macosx/debug/ShotX.build/MainWindow.swiftdeps"
   },
   "/Users/mac/.superset/projects/shotx/Sources/ShotX/OverlayController.swift": {
     "dependencies": "/Users/mac/.superset/projects/shotx/.build/arm64-apple-macosx/debug/ShotX.build/OverlayController.d",
@@ -26,6 +50,12 @@
     "swiftmodule": "/Users/mac/.superset/projects/shotx/.build/arm64-apple-macosx/debug/ShotX.build/OverlayWindow~partial.swiftmodule",
     "swift-dependencies": "/Users/mac/.superset/projects/shotx/.build/arm64-apple-macosx/debug/ShotX.build/OverlayWindow.swiftdeps"
   },
+  "/Users/mac/.superset/projects/shotx/Sources/ShotX/PostCapturePopup.swift": {
+    "dependencies": "/Users/mac/.superset/projects/shotx/.build/arm64-apple-macosx/debug/ShotX.build/PostCapturePopup.d",
+    "object": "/Users/mac/.superset/projects/shotx/.build/arm64-apple-macosx/debug/ShotX.build/PostCapturePopup.swift.o",
+    "swiftmodule": "/Users/mac/.superset/projects/shotx/.build/arm64-apple-macosx/debug/ShotX.build/PostCapturePopup~partial.swiftmodule",
+    "swift-dependencies": "/Users/mac/.superset/projects/shotx/.build/arm64-apple-macosx/debug/ShotX.build/PostCapturePopup.swiftdeps"
+  },
   "/Users/mac/.superset/projects/shotx/Sources/ShotX/ScreenCapture.swift": {
     "dependencies": "/Users/mac/.superset/projects/shotx/.build/arm64-apple-macosx/debug/ShotX.build/ScreenCapture.d",
     "object": "/Users/mac/.superset/projects/shotx/.build/arm64-apple-macosx/debug/ShotX.build/ScreenCapture.swift.o",
@@ -37,6 +67,18 @@
     "object": "/Users/mac/.superset/projects/shotx/.build/arm64-apple-macosx/debug/ShotX.build/SelectionView.swift.o",
     "swiftmodule": "/Users/mac/.superset/projects/shotx/.build/arm64-apple-macosx/debug/ShotX.build/SelectionView~partial.swiftmodule",
     "swift-dependencies": "/Users/mac/.superset/projects/shotx/.build/arm64-apple-macosx/debug/ShotX.build/SelectionView.swiftdeps"
+  },
+  "/Users/mac/.superset/projects/shotx/Sources/ShotX/ShortcutRecorder.swift": {
+    "dependencies": "/Users/mac/.superset/projects/shotx/.build/arm64-apple-macosx/debug/ShotX.build/ShortcutRecorder.d",
+    "object": "/Users/mac/.superset/projects/shotx/.build/arm64-apple-macosx/debug/ShotX.build/ShortcutRecorder.swift.o",
+    "swiftmodule": "/Users/mac/.superset/projects/shotx/.build/arm64-apple-macosx/debug/ShotX.build/ShortcutRecorder~partial.swiftmodule",
+    "swift-dependencies": "/Users/mac/.superset/projects/shotx/.build/arm64-apple-macosx/debug/ShotX.build/ShortcutRecorder.swiftdeps"
+  },
+  "/Users/mac/.superset/projects/shotx/Sources/ShotX/ShortcutStore.swift": {
+    "dependencies": "/Users/mac/.superset/projects/shotx/.build/arm64-apple-macosx/debug/ShotX.build/ShortcutStore.d",
+    "object": "/Users/mac/.superset/projects/shotx/.build/arm64-apple-macosx/debug/ShotX.build/ShortcutStore.swift.o",
+    "swiftmodule": "/Users/mac/.superset/projects/shotx/.build/arm64-apple-macosx/debug/ShotX.build/ShortcutStore~partial.swiftmodule",
+    "swift-dependencies": "/Users/mac/.superset/projects/shotx/.build/arm64-apple-macosx/debug/ShotX.build/ShortcutStore.swiftdeps"
   },
   "/Users/mac/.superset/projects/shotx/Sources/ShotX/main.swift": {
     "dependencies": "/Users/mac/.superset/projects/shotx/.build/arm64-apple-macosx/debug/ShotX.build/main.d",

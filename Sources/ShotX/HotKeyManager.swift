@@ -13,17 +13,15 @@ final class HotKeyManager {
     init() {
         id = HotKeyManager.nextID
         HotKeyManager.nextID += 1
+        HotKeyManager.instances[id] = self
+        installHandler()
     }
 
-    func register(handler: @escaping () -> Void) {
-        self.handler = handler
-        HotKeyManager.instances[id] = self
-
+    private func installHandler() {
         var eventType = EventTypeSpec(
             eventClass: OSType(kEventClassKeyboard),
             eventKind: UInt32(kEventHotKeyPressed)
         )
-
         InstallEventHandler(
             GetApplicationEventTarget(),
             { (_, event, _) -> OSStatus in
@@ -48,23 +46,31 @@ final class HotKeyManager {
             nil,
             &eventHandler
         )
+    }
 
-        // 'SHTX' signature, D key, Option modifier
+    @discardableResult
+    func register(keyCode: UInt32, modifiers: UInt32, handler: @escaping () -> Void) -> Bool {
+        unregister()
+        self.handler = handler
         let signature: OSType = 0x53485458
         let hotKeyID = EventHotKeyID(signature: signature, id: id)
-        RegisterEventHotKey(
-            UInt32(kVK_ANSI_D),
-            UInt32(optionKey),
-            hotKeyID,
-            GetApplicationEventTarget(),
-            0,
-            &hotKeyRef
+        let status = RegisterEventHotKey(
+            keyCode, modifiers, hotKeyID,
+            GetApplicationEventTarget(), 0, &hotKeyRef
         )
+        return status == noErr
+    }
+
+    func unregister() {
+        if let ref = hotKeyRef {
+            UnregisterEventHotKey(ref)
+            hotKeyRef = nil
+        }
     }
 
     deinit {
-        if let ref = hotKeyRef { UnregisterEventHotKey(ref) }
-        if let handler = eventHandler { RemoveEventHandler(handler) }
+        unregister()
+        if let h = eventHandler { RemoveEventHandler(h) }
         HotKeyManager.instances.removeValue(forKey: id)
     }
 }
