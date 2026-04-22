@@ -2,11 +2,11 @@ import Cocoa
 
 final class OverlayController {
     private var windows: [OverlayWindow] = []
-    private var completion: ((NSImage?) -> Void)?
+    private var completion: ((NSImage?, CGRect?, NSScreen?) -> Void)?
     private var finished = false
     private var cursorPushed = false
 
-    func begin(completion: @escaping (NSImage?) -> Void) {
+    func begin(completion: @escaping (NSImage?, CGRect?, NSScreen?) -> Void) {
         self.completion = completion
 
         NSApp.activate(ignoringOtherApps: true)
@@ -38,13 +38,13 @@ final class OverlayController {
         closeWindows()
 
         guard let rect = rectInScreen, let screen = screen else {
-            completion?(nil)
+            completion?(nil, nil, nil)
             return
         }
 
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.12) { [weak self] in
             let image = ScreenCapture.capture(rectInScreenCoords: rect, screen: screen)
-            self?.completion?(image)
+            self?.completion?(image, rect, screen)
         }
     }
 

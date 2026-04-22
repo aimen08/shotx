@@ -24,11 +24,23 @@
       "inputs" : [
         {
           "kind" : "file",
+          "name" : "/Users/mac/.superset/projects/shotx/Sources/ShotX/AllInOne.swift"
+        },
+        {
+          "kind" : "file",
           "name" : "/Users/mac/.superset/projects/shotx/Sources/ShotX/Annotation.swift"
         },
         {
           "kind" : "file",
           "name" : "/Users/mac/.superset/projects/shotx/Sources/ShotX/AppDelegate.swift"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/mac/.superset/projects/shotx/Sources/ShotX/DesktopIcons.swift"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/mac/.superset/projects/shotx/Sources/ShotX/FloatingPanels.swift"
         },
         {
           "kind" : "file",
@@ -44,6 +56,10 @@
         },
         {
           "kind" : "file",
+          "name" : "/Users/mac/.superset/projects/shotx/Sources/ShotX/LastCaptureStore.swift"
+        },
+        {
+          "kind" : "file",
           "name" : "/Users/mac/.superset/projects/shotx/Sources/ShotX/MainWindow.swift"
         },
         {
@@ -53,6 +69,10 @@
         {
           "kind" : "file",
           "name" : "/Users/mac/.superset/projects/shotx/Sources/ShotX/OverlayWindow.swift"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/mac/.superset/projects/shotx/Sources/ShotX/PinnedImage.swift"
         },
         {
           "kind" : "file",
@@ -76,6 +96,10 @@
         },
         {
           "kind" : "file",
+          "name" : "/Users/mac/.superset/projects/shotx/Sources/ShotX/WindowCapture.swift"
+        },
+        {
+          "kind" : "file",
           "name" : "/Users/mac/.superset/projects/shotx/Sources/ShotX/main.swift"
         },
         {
@@ -91,19 +115,25 @@
       "moduleName" : "ShotX",
       "moduleOutputPath" : "/Users/mac/.superset/projects/shotx/.build/arm64-apple-macosx/debug/ShotX.swiftmodule",
       "objects" : [
+        "/Users/mac/.superset/projects/shotx/.build/arm64-apple-macosx/debug/ShotX.build/AllInOne.swift.o",
         "/Users/mac/.superset/projects/shotx/.build/arm64-apple-macosx/debug/ShotX.build/Annotation.swift.o",
         "/Users/mac/.superset/projects/shotx/.build/arm64-apple-macosx/debug/ShotX.build/AppDelegate.swift.o",
+        "/Users/mac/.superset/projects/shotx/.build/arm64-apple-macosx/debug/ShotX.build/DesktopIcons.swift.o",
+        "/Users/mac/.superset/projects/shotx/.build/arm64-apple-macosx/debug/ShotX.build/FloatingPanels.swift.o",
         "/Users/mac/.superset/projects/shotx/.build/arm64-apple-macosx/debug/ShotX.build/HistoryStore.swift.o",
         "/Users/mac/.superset/projects/shotx/.build/arm64-apple-macosx/debug/ShotX.build/HotKeyManager.swift.o",
         "/Users/mac/.superset/projects/shotx/.build/arm64-apple-macosx/debug/ShotX.build/ImageSaver.swift.o",
+        "/Users/mac/.superset/projects/shotx/.build/arm64-apple-macosx/debug/ShotX.build/LastCaptureStore.swift.o",
         "/Users/mac/.superset/projects/shotx/.build/arm64-apple-macosx/debug/ShotX.build/MainWindow.swift.o",
         "/Users/mac/.superset/projects/shotx/.build/arm64-apple-macosx/debug/ShotX.build/OverlayController.swift.o",
         "/Users/mac/.superset/projects/shotx/.build/arm64-apple-macosx/debug/ShotX.build/OverlayWindow.swift.o",
+        "/Users/mac/.superset/projects/shotx/.build/arm64-apple-macosx/debug/ShotX.build/PinnedImage.swift.o",
         "/Users/mac/.superset/projects/shotx/.build/arm64-apple-macosx/debug/ShotX.build/PostCapturePopup.swift.o",
         "/Users/mac/.superset/projects/shotx/.build/arm64-apple-macosx/debug/ShotX.build/ScreenCapture.swift.o",
         "/Users/mac/.superset/projects/shotx/.build/arm64-apple-macosx/debug/ShotX.build/SelectionView.swift.o",
         "/Users/mac/.superset/projects/shotx/.build/arm64-apple-macosx/debug/ShotX.build/ShortcutRecorder.swift.o",
         "/Users/mac/.superset/projects/shotx/.build/arm64-apple-macosx/debug/ShotX.build/ShortcutStore.swift.o",
+        "/Users/mac/.superset/projects/shotx/.build/arm64-apple-macosx/debug/ShotX.build/WindowCapture.swift.o",
         "/Users/mac/.superset/projects/shotx/.build/arm64-apple-macosx/debug/ShotX.build/main.swift.o"
       ],
       "otherArguments" : [
@@ -155,11 +185,23 @@
       "outputs" : [
         {
           "kind" : "file",
+          "name" : "/Users/mac/.superset/projects/shotx/.build/arm64-apple-macosx/debug/ShotX.build/AllInOne.swift.o"
+        },
+        {
+          "kind" : "file",
           "name" : "/Users/mac/.superset/projects/shotx/.build/arm64-apple-macosx/debug/ShotX.build/Annotation.swift.o"
         },
         {
           "kind" : "file",
           "name" : "/Users/mac/.superset/projects/shotx/.build/arm64-apple-macosx/debug/ShotX.build/AppDelegate.swift.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/mac/.superset/projects/shotx/.build/arm64-apple-macosx/debug/ShotX.build/DesktopIcons.swift.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/mac/.superset/projects/shotx/.build/arm64-apple-macosx/debug/ShotX.build/FloatingPanels.swift.o"
         },
         {
           "kind" : "file",
@@ -175,6 +217,10 @@
         },
         {
           "kind" : "file",
+          "name" : "/Users/mac/.superset/projects/shotx/.build/arm64-apple-macosx/debug/ShotX.build/LastCaptureStore.swift.o"
+        },
+        {
+          "kind" : "file",
           "name" : "/Users/mac/.superset/projects/shotx/.build/arm64-apple-macosx/debug/ShotX.build/MainWindow.swift.o"
         },
         {
@@ -184,6 +230,10 @@
         {
           "kind" : "file",
           "name" : "/Users/mac/.superset/projects/shotx/.build/arm64-apple-macosx/debug/ShotX.build/OverlayWindow.swift.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/mac/.superset/projects/shotx/.build/arm64-apple-macosx/debug/ShotX.build/PinnedImage.swift.o"
         },
         {
           "kind" : "file",
@@ -207,6 +257,10 @@
         },
         {
           "kind" : "file",
+          "name" : "/Users/mac/.superset/projects/shotx/.build/arm64-apple-macosx/debug/ShotX.build/WindowCapture.swift.o"
+        },
+        {
+          "kind" : "file",
           "name" : "/Users/mac/.superset/projects/shotx/.build/arm64-apple-macosx/debug/ShotX.build/main.swift.o"
         },
         {
@@ -215,19 +269,25 @@
         }
       ],
       "sources" : [
+        "/Users/mac/.superset/projects/shotx/Sources/ShotX/AllInOne.swift",
         "/Users/mac/.superset/projects/shotx/Sources/ShotX/Annotation.swift",
         "/Users/mac/.superset/projects/shotx/Sources/ShotX/AppDelegate.swift",
+        "/Users/mac/.superset/projects/shotx/Sources/ShotX/DesktopIcons.swift",
+        "/Users/mac/.superset/projects/shotx/Sources/ShotX/FloatingPanels.swift",
         "/Users/mac/.superset/projects/shotx/Sources/ShotX/HistoryStore.swift",
         "/Users/mac/.superset/projects/shotx/Sources/ShotX/HotKeyManager.swift",
         "/Users/mac/.superset/projects/shotx/Sources/ShotX/ImageSaver.swift",
+        "/Users/mac/.superset/projects/shotx/Sources/ShotX/LastCaptureStore.swift",
         "/Users/mac/.superset/projects/shotx/Sources/ShotX/MainWindow.swift",
         "/Users/mac/.superset/projects/shotx/Sources/ShotX/OverlayController.swift",
         "/Users/mac/.superset/projects/shotx/Sources/ShotX/OverlayWindow.swift",
+        "/Users/mac/.superset/projects/shotx/Sources/ShotX/PinnedImage.swift",
         "/Users/mac/.superset/projects/shotx/Sources/ShotX/PostCapturePopup.swift",
         "/Users/mac/.superset/projects/shotx/Sources/ShotX/ScreenCapture.swift",
         "/Users/mac/.superset/projects/shotx/Sources/ShotX/SelectionView.swift",
         "/Users/mac/.superset/projects/shotx/Sources/ShotX/ShortcutRecorder.swift",
         "/Users/mac/.superset/projects/shotx/Sources/ShotX/ShortcutStore.swift",
+        "/Users/mac/.superset/projects/shotx/Sources/ShotX/WindowCapture.swift",
         "/Users/mac/.superset/projects/shotx/Sources/ShotX/main.swift"
       ],
       "tempsPath" : "/Users/mac/.superset/projects/shotx/.build/arm64-apple-macosx/debug/ShotX.build",
@@ -246,19 +306,25 @@
       "shotx",
       "-incremental",
       "-c",
+      "/Users/mac/.superset/projects/shotx/Sources/ShotX/AllInOne.swift",
       "/Users/mac/.superset/projects/shotx/Sources/ShotX/Annotation.swift",
       "/Users/mac/.superset/projects/shotx/Sources/ShotX/AppDelegate.swift",
+      "/Users/mac/.superset/projects/shotx/Sources/ShotX/DesktopIcons.swift",
+      "/Users/mac/.superset/projects/shotx/Sources/ShotX/FloatingPanels.swift",
       "/Users/mac/.superset/projects/shotx/Sources/ShotX/HistoryStore.swift",
       "/Users/mac/.superset/projects/shotx/Sources/ShotX/HotKeyManager.swift",
       "/Users/mac/.superset/projects/shotx/Sources/ShotX/ImageSaver.swift",
+      "/Users/mac/.superset/projects/shotx/Sources/ShotX/LastCaptureStore.swift",
       "/Users/mac/.superset/projects/shotx/Sources/ShotX/MainWindow.swift",
       "/Users/mac/.superset/projects/shotx/Sources/ShotX/OverlayController.swift",
       "/Users/mac/.superset/projects/shotx/Sources/ShotX/OverlayWindow.swift",
+      "/Users/mac/.superset/projects/shotx/Sources/ShotX/PinnedImage.swift",
       "/Users/mac/.superset/projects/shotx/Sources/ShotX/PostCapturePopup.swift",
       "/Users/mac/.superset/projects/shotx/Sources/ShotX/ScreenCapture.swift",
       "/Users/mac/.superset/projects/shotx/Sources/ShotX/SelectionView.swift",
       "/Users/mac/.superset/projects/shotx/Sources/ShotX/ShortcutRecorder.swift",
       "/Users/mac/.superset/projects/shotx/Sources/ShotX/ShortcutStore.swift",
+      "/Users/mac/.superset/projects/shotx/Sources/ShotX/WindowCapture.swift",
       "/Users/mac/.superset/projects/shotx/Sources/ShotX/main.swift",
       "-I",
       "/Users/mac/.superset/projects/shotx/.build/arm64-apple-macosx/debug",
@@ -344,11 +410,23 @@
         },
         {
           "kind" : "file",
+          "name" : "/Users/mac/.superset/projects/shotx/Sources/ShotX/AllInOne.swift"
+        },
+        {
+          "kind" : "file",
           "name" : "/Users/mac/.superset/projects/shotx/Sources/ShotX/Annotation.swift"
         },
         {
           "kind" : "file",
           "name" : "/Users/mac/.superset/projects/shotx/Sources/ShotX/AppDelegate.swift"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/mac/.superset/projects/shotx/Sources/ShotX/DesktopIcons.swift"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/mac/.superset/projects/shotx/Sources/ShotX/FloatingPanels.swift"
         },
         {
           "kind" : "file",
@@ -364,6 +442,10 @@
         },
         {
           "kind" : "file",
+          "name" : "/Users/mac/.superset/projects/shotx/Sources/ShotX/LastCaptureStore.swift"
+        },
+        {
+          "kind" : "file",
           "name" : "/Users/mac/.superset/projects/shotx/Sources/ShotX/MainWindow.swift"
         },
         {
@@ -373,6 +455,10 @@
         {
           "kind" : "file",
           "name" : "/Users/mac/.superset/projects/shotx/Sources/ShotX/OverlayWindow.swift"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/mac/.superset/projects/shotx/Sources/ShotX/PinnedImage.swift"
         },
         {
           "kind" : "file",
@@ -396,6 +482,10 @@
         },
         {
           "kind" : "file",
+          "name" : "/Users/mac/.superset/projects/shotx/Sources/ShotX/WindowCapture.swift"
+        },
+        {
+          "kind" : "file",
           "name" : "/Users/mac/.superset/projects/shotx/Sources/ShotX/main.swift"
         }
       ],
@@ -410,11 +500,23 @@
         },
         {
           "kind" : "file",
+          "name" : "/Users/mac/.superset/projects/shotx/.build/arm64-apple-macosx/debug/ShotX.build/AllInOne.swift.o"
+        },
+        {
+          "kind" : "file",
           "name" : "/Users/mac/.superset/projects/shotx/.build/arm64-apple-macosx/debug/ShotX.build/Annotation.swift.o"
         },
         {
           "kind" : "file",
           "name" : "/Users/mac/.superset/projects/shotx/.build/arm64-apple-macosx/debug/ShotX.build/AppDelegate.swift.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/mac/.superset/projects/shotx/.build/arm64-apple-macosx/debug/ShotX.build/DesktopIcons.swift.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/mac/.superset/projects/shotx/.build/arm64-apple-macosx/debug/ShotX.build/FloatingPanels.swift.o"
         },
         {
           "kind" : "file",
@@ -430,6 +532,10 @@
         },
         {
           "kind" : "file",
+          "name" : "/Users/mac/.superset/projects/shotx/.build/arm64-apple-macosx/debug/ShotX.build/LastCaptureStore.swift.o"
+        },
+        {
+          "kind" : "file",
           "name" : "/Users/mac/.superset/projects/shotx/.build/arm64-apple-macosx/debug/ShotX.build/MainWindow.swift.o"
         },
         {
@@ -439,6 +545,10 @@
         {
           "kind" : "file",
           "name" : "/Users/mac/.superset/projects/shotx/.build/arm64-apple-macosx/debug/ShotX.build/OverlayWindow.swift.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/mac/.superset/projects/shotx/.build/arm64-apple-macosx/debug/ShotX.build/PinnedImage.swift.o"
         },
         {
           "kind" : "file",
@@ -459,6 +569,10 @@
         {
           "kind" : "file",
           "name" : "/Users/mac/.superset/projects/shotx/.build/arm64-apple-macosx/debug/ShotX.build/ShortcutStore.swift.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/mac/.superset/projects/shotx/.build/arm64-apple-macosx/debug/ShotX.build/WindowCapture.swift.o"
         },
         {
           "kind" : "file",

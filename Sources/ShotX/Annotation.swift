@@ -572,31 +572,51 @@ struct AnnotationToolbar: View {
             colorGroup
             Spacer(minLength: 8)
             undoButton
-            Divider().frame(height: 20)
+            verticalDivider
             Button("Cancel", action: onCancel)
-                .buttonStyle(SlickButtonStyle(prominent: false))
+                .buttonStyle(ToolbarActionStyle(kind: .subtle))
                 .fixedSize()
             Button(action: onSave) {
                 Label("Save", systemImage: "square.and.arrow.down")
                     .lineLimit(1)
             }
-            .buttonStyle(SlickButtonStyle(prominent: false))
+            .buttonStyle(ToolbarActionStyle(kind: .secondary))
             .fixedSize()
             Button(action: onCopy) {
                 Label("Copy", systemImage: "doc.on.doc")
                     .lineLimit(1)
             }
-            .buttonStyle(SlickButtonStyle(prominent: true))
+            .buttonStyle(ToolbarActionStyle(kind: .primary))
             .fixedSize()
             .keyboardShortcut(.defaultAction)
         }
-        .padding(.horizontal, 16)
-        .padding(.vertical, 10)
+        .padding(.horizontal, 18)
+        .padding(.vertical, 12)
         .frame(maxWidth: .infinity)
-        .background(.ultraThinMaterial)
-        .overlay(alignment: .bottom) {
-            Divider()
+        .background(toolbarBackground)
+    }
+
+    private var toolbarBackground: some View {
+        ZStack {
+            Rectangle().fill(.ultraThinMaterial)
+            LinearGradient(
+                colors: [Color.white.opacity(0.03), Color.clear],
+                startPoint: .top,
+                endPoint: .bottom
+            )
         }
+        .overlay(alignment: .bottom) {
+            Rectangle()
+                .fill(Color.primary.opacity(0.1))
+                .frame(height: 0.5)
+        }
+    }
+
+    private var verticalDivider: some View {
+        Rectangle()
+            .fill(Color.primary.opacity(0.14))
+            .frame(width: 1, height: 22)
+            .padding(.horizontal, 2)
     }
 
     private var toolGroup: some View {
@@ -612,15 +632,12 @@ struct AnnotationToolbar: View {
             }
         }
         .padding(4)
-        .background(
-            RoundedRectangle(cornerRadius: 10)
-                .fill(Color.primary.opacity(0.06))
-        )
+        .background(GroupCapsuleBackground())
         .fixedSize()
     }
 
     private var colorGroup: some View {
-        HStack(spacing: 7) {
+        HStack(spacing: 8) {
             ForEach(AnnotationState.palette.indices, id: \.self) { idx in
                 ColorDot(
                     color: Color(nsColor: AnnotationState.palette[idx]),
@@ -630,12 +647,9 @@ struct AnnotationToolbar: View {
                 }
             }
         }
-        .padding(.horizontal, 8)
-        .padding(.vertical, 5)
-        .background(
-            RoundedRectangle(cornerRadius: 10)
-                .fill(Color.primary.opacity(0.06))
-        )
+        .padding(.horizontal, 9)
+        .padding(.vertical, 6)
+        .background(GroupCapsuleBackground())
         .fixedSize()
     }
 
@@ -643,12 +657,23 @@ struct AnnotationToolbar: View {
         Button(action: onUndo) {
             Image(systemName: "arrow.uturn.backward")
                 .font(.system(size: 13, weight: .semibold))
-                .frame(width: 30, height: 26)
+                .frame(width: 34, height: 30)
         }
-        .buttonStyle(SlickButtonStyle(prominent: false))
+        .buttonStyle(ToolbarActionStyle(kind: .iconOnly))
         .keyboardShortcut("z", modifiers: .command)
         .help("Undo (⌘Z)")
         .fixedSize()
+    }
+}
+
+private struct GroupCapsuleBackground: View {
+    var body: some View {
+        RoundedRectangle(cornerRadius: 11)
+            .fill(Color.black.opacity(0.22))
+            .overlay(
+                RoundedRectangle(cornerRadius: 11)
+                    .strokeBorder(Color.white.opacity(0.05), lineWidth: 0.5)
+            )
     }
 }
 
@@ -662,18 +687,46 @@ private struct ToolChip: View {
     var body: some View {
         Button(action: action) {
             Image(systemName: systemName)
-                .font(.system(size: 14, weight: .semibold))
-                .frame(width: 34, height: 28)
-                .foregroundStyle(isSelected ? Color.white : Color.primary.opacity(0.85))
-                .background(
-                    RoundedRectangle(cornerRadius: 7)
-                        .fill(isSelected ? Color.accentColor : (hovering ? Color.primary.opacity(0.08) : .clear))
+                .font(.system(size: 15, weight: .semibold))
+                .frame(width: 40, height: 30)
+                .foregroundStyle(foreground)
+                .background(background)
+                .shadow(
+                    color: isSelected ? Color.accentColor.opacity(0.35) : .clear,
+                    radius: 4, y: 1
                 )
         }
         .buttonStyle(.plain)
         .onHover { hovering = $0 }
         .help(tooltip)
-        .animation(.easeOut(duration: 0.12), value: isSelected)
+        .animation(.easeOut(duration: 0.14), value: isSelected)
+        .animation(.easeOut(duration: 0.12), value: hovering)
+    }
+
+    private var foreground: Color {
+        if isSelected { return .white }
+        return hovering ? .primary : .primary.opacity(0.78)
+    }
+
+    @ViewBuilder private var background: some View {
+        if isSelected {
+            RoundedRectangle(cornerRadius: 8)
+                .fill(
+                    LinearGradient(
+                        colors: [
+                            Color.accentColor,
+                            Color.accentColor.opacity(0.82)
+                        ],
+                        startPoint: .top,
+                        endPoint: .bottom
+                    )
+                )
+        } else if hovering {
+            RoundedRectangle(cornerRadius: 8)
+                .fill(Color.primary.opacity(0.1))
+        } else {
+            Color.clear
+        }
     }
 }
 
@@ -687,45 +740,108 @@ private struct ColorDot: View {
         Button(action: action) {
             ZStack {
                 Circle()
-                    .strokeBorder(Color.accentColor, lineWidth: isSelected ? 2.5 : 0)
+                    .strokeBorder(Color.white.opacity(isSelected ? 0.95 : 0), lineWidth: 2)
                     .frame(width: 24, height: 24)
                 Circle()
                     .fill(color)
-                    .frame(width: isSelected ? 16 : 18, height: isSelected ? 16 : 18)
+                    .frame(width: isSelected ? 15 : 18, height: isSelected ? 15 : 18)
                     .overlay(
                         Circle()
-                            .strokeBorder(Color.primary.opacity(0.15), lineWidth: 0.5)
+                            .strokeBorder(Color.black.opacity(0.25), lineWidth: 0.5)
                     )
-                    .scaleEffect(hovering && !isSelected ? 1.1 : 1.0)
+                    .shadow(color: color.opacity(isSelected ? 0.55 : 0), radius: 4, y: 1)
+                    .scaleEffect(hovering && !isSelected ? 1.14 : 1.0)
             }
         }
         .buttonStyle(.plain)
         .onHover { hovering = $0 }
-        .animation(.spring(response: 0.25, dampingFraction: 0.7), value: isSelected)
+        .animation(.spring(response: 0.28, dampingFraction: 0.72), value: isSelected)
         .animation(.easeOut(duration: 0.12), value: hovering)
     }
 }
 
-struct SlickButtonStyle: ButtonStyle {
-    let prominent: Bool
+enum ToolbarActionKind {
+    case subtle     // Cancel — text-only, low emphasis
+    case secondary  // Save — bordered, medium emphasis
+    case primary    // Copy — filled accent, high emphasis
+    case iconOnly   // Undo — compact square
+}
+
+struct ToolbarActionStyle: ButtonStyle {
+    let kind: ToolbarActionKind
     @State private var hovering = false
 
     func makeBody(configuration: Configuration) -> some View {
         configuration.label
             .font(.system(size: 12.5, weight: .semibold))
-            .padding(.horizontal, 12)
-            .padding(.vertical, 6)
-            .foregroundStyle(prominent ? Color.white : Color.primary)
-            .background(
-                RoundedRectangle(cornerRadius: 7)
-                    .fill(
-                        prominent
-                            ? Color.accentColor.opacity(configuration.isPressed ? 0.8 : 1.0)
-                            : Color.primary.opacity(configuration.isPressed ? 0.15 : (hovering ? 0.1 : 0.06))
-                    )
+            .padding(.horizontal, kind == .iconOnly ? 0 : 14)
+            .padding(.vertical, kind == .iconOnly ? 0 : 8)
+            .foregroundStyle(foreground(pressed: configuration.isPressed))
+            .background(background(pressed: configuration.isPressed))
+            .overlay(
+                RoundedRectangle(cornerRadius: 8)
+                    .strokeBorder(borderColor, lineWidth: borderWidth)
             )
+            .shadow(color: shadowColor, radius: 4, y: 1)
+            .contentShape(RoundedRectangle(cornerRadius: 8))
             .onHover { hovering = $0 }
             .animation(.easeOut(duration: 0.12), value: hovering)
+            .animation(.easeOut(duration: 0.08), value: configuration.isPressed)
+    }
+
+    private func foreground(pressed: Bool) -> Color {
+        switch kind {
+        case .primary: return .white
+        case .secondary, .subtle, .iconOnly: return .primary
+        }
+    }
+
+    @ViewBuilder private func background(pressed: Bool) -> some View {
+        switch kind {
+        case .primary:
+            RoundedRectangle(cornerRadius: 8)
+                .fill(
+                    LinearGradient(
+                        colors: [
+                            Color.accentColor.opacity(pressed ? 0.78 : 1.0),
+                            Color.accentColor.opacity(pressed ? 0.65 : 0.82)
+                        ],
+                        startPoint: .top,
+                        endPoint: .bottom
+                    )
+                )
+        case .secondary:
+            RoundedRectangle(cornerRadius: 8)
+                .fill(Color.primary.opacity(pressed ? 0.14 : (hovering ? 0.1 : 0.07)))
+        case .subtle:
+            RoundedRectangle(cornerRadius: 8)
+                .fill(Color.primary.opacity(pressed ? 0.12 : (hovering ? 0.07 : 0)))
+        case .iconOnly:
+            RoundedRectangle(cornerRadius: 8)
+                .fill(Color.primary.opacity(pressed ? 0.14 : (hovering ? 0.1 : 0.06)))
+        }
+    }
+
+    private var borderColor: Color {
+        switch kind {
+        case .secondary: return Color.primary.opacity(hovering ? 0.14 : 0.08)
+        case .iconOnly: return Color.primary.opacity(0.05)
+        default: return .clear
+        }
+    }
+
+    private var borderWidth: CGFloat {
+        switch kind {
+        case .secondary, .iconOnly: return 0.5
+        default: return 0
+        }
+    }
+
+    private var shadowColor: Color {
+        switch kind {
+        case .primary: return Color.accentColor.opacity(0.32)
+        default: return .clear
+        }
     }
 }
 

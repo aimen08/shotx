@@ -1,17 +1,24 @@
 import Cocoa
 import SwiftUI
 
+final class MainWindowState: ObservableObject {
+    @Published var tab: MainView.Tab = .history
+}
+
 final class MainWindowController {
     private var window: NSWindow?
+    let state = MainWindowState()
 
-    func show() {
+    func show(tab: MainView.Tab? = nil) {
+        if let tab = tab { state.tab = tab }
+
         if let window = window {
             window.makeKeyAndOrderFront(nil)
             NSApp.activate(ignoringOtherApps: true)
             return
         }
 
-        let root = MainView()
+        let root = MainView(state: state)
             .environmentObject(HistoryStore.shared)
             .environmentObject(ShortcutStore.shared)
         let hosting = NSHostingController(rootView: root)
@@ -34,11 +41,11 @@ struct MainView: View {
         var title: String { self == .history ? "History" : "Settings" }
     }
 
-    @State private var tab: Tab = .history
+    @ObservedObject var state: MainWindowState
 
     var body: some View {
         VStack(spacing: 0) {
-            Picker("", selection: $tab) {
+            Picker("", selection: $state.tab) {
                 ForEach(Tab.allCases, id: \.self) { t in
                     Text(t.title).tag(t)
                 }
@@ -51,7 +58,7 @@ struct MainView: View {
             Divider()
 
             Group {
-                switch tab {
+                switch state.tab {
                 case .history: HistoryView()
                 case .settings: SettingsView()
                 }

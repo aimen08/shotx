@@ -52,6 +52,19 @@ enum ShortcutFormatter {
         return letterOrDigit(for: keyCode) ?? "Key \(keyCode)"
     }
 
+    static func menuKeyEquivalent(for keyCode: UInt32) -> String? {
+        letterOrDigit(for: keyCode)?.lowercased()
+    }
+
+    static func nsModifierFlags(from carbon: UInt32) -> NSEvent.ModifierFlags {
+        var flags: NSEvent.ModifierFlags = []
+        if carbon & UInt32(cmdKey) != 0 { flags.insert(.command) }
+        if carbon & UInt32(optionKey) != 0 { flags.insert(.option) }
+        if carbon & UInt32(controlKey) != 0 { flags.insert(.control) }
+        if carbon & UInt32(shiftKey) != 0 { flags.insert(.shift) }
+        return flags
+    }
+
     private static let specialKeyNames: [UInt32: String] = [
         UInt32(kVK_Return): "↩",
         UInt32(kVK_Tab): "⇥",

@@ -2,6 +2,12 @@
   "": {
     "swift-dependencies": "/Users/mac/.superset/projects/shotx/.build/arm64-apple-macosx/debug/ShotX.build/master.swiftdeps"
   },
+  "/Users/mac/.superset/projects/shotx/Sources/ShotX/AllInOne.swift": {
+    "dependencies": "/Users/mac/.superset/projects/shotx/.build/arm64-apple-macosx/debug/ShotX.build/AllInOne.d",
+    "object": "/Users/mac/.superset/projects/shotx/.build/arm64-apple-macosx/debug/ShotX.build/AllInOne.swift.o",
+    "swiftmodule": "/Users/mac/.superset/projects/shotx/.build/arm64-apple-macosx/debug/ShotX.build/AllInOne~partial.swiftmodule",
+    "swift-dependencies": "/Users/mac/.superset/projects/shotx/.build/arm64-apple-macosx/debug/ShotX.build/AllInOne.swiftdeps"
+  },
   "/Users/mac/.superset/projects/shotx/Sources/ShotX/Annotation.swift": {
     "dependencies": "/Users/mac/.superset/projects/shotx/.build/arm64-apple-macosx/debug/ShotX.build/Annotation.d",
     "object": "/Users/mac/.superset/projects/shotx/.build/arm64-apple-macosx/debug/ShotX.build/Annotation.swift.o",
@@ -13,6 +19,18 @@
     "object": "/Users/mac/.superset/projects/shotx/.build/arm64-apple-macosx/debug/ShotX.build/AppDelegate.swift.o",
     "swiftmodule": "/Users/mac/.superset/projects/shotx/.build/arm64-apple-macosx/debug/ShotX.build/AppDelegate~partial.swiftmodule",
     "swift-dependencies": "/Users/mac/.superset/projects/shotx/.build/arm64-apple-macosx/debug/ShotX.build/AppDelegate.swiftdeps"
+  },
+  "/Users/mac/.superset/projects/shotx/Sources/ShotX/DesktopIcons.swift": {
+    "dependencies": "/Users/mac/.superset/projects/shotx/.build/arm64-apple-macosx/debug/ShotX.build/DesktopIcons.d",
+    "object": "/Users/mac/.superset/projects/shotx/.build/arm64-apple-macosx/debug/ShotX.build/DesktopIcons.swift.o",
+    "swiftmodule": "/Users/mac/.superset/projects/shotx/.build/arm64-apple-macosx/debug/ShotX.build/DesktopIcons~partial.swiftmodule",
+    "swift-dependencies": "/Users/mac/.superset/projects/shotx/.build/arm64-apple-macosx/debug/ShotX.build/DesktopIcons.swiftdeps"
+  },
+  "/Users/mac/.superset/projects/shotx/Sources/ShotX/FloatingPanels.swift": {
+    "dependencies": "/Users/mac/.superset/projects/shotx/.build/arm64-apple-macosx/debug/ShotX.build/FloatingPanels.d",
+    "object": "/Users/mac/.superset/projects/shotx/.build/arm64-apple-macosx/debug/ShotX.build/FloatingPanels.swift.o",
+    "swiftmodule": "/Users/mac/.superset/projects/shotx/.build/arm64-apple-macosx/debug/ShotX.build/FloatingPanels~partial.swiftmodule",
+    "swift-dependencies": "/Users/mac/.superset/projects/shotx/.build/arm64-apple-macosx/debug/ShotX.build/FloatingPanels.swiftdeps"
   },
   "/Users/mac/.superset/projects/shotx/Sources/ShotX/HistoryStore.swift": {
     "dependencies": "/Users/mac/.superset/projects/shotx/.build/arm64-apple-macosx/debug/ShotX.build/HistoryStore.d",
@@ -32,6 +50,12 @@
     "swiftmodule": "/Users/mac/.superset/projects/shotx/.build/arm64-apple-macosx/debug/ShotX.build/ImageSaver~partial.swiftmodule",
     "swift-dependencies": "/Users/mac/.superset/projects/shotx/.build/arm64-apple-macosx/debug/ShotX.build/ImageSaver.swiftdeps"
   },
+  "/Users/mac/.superset/projects/shotx/Sources/ShotX/LastCaptureStore.swift": {
+    "dependencies": "/Users/mac/.superset/projects/shotx/.build/arm64-apple-macosx/debug/ShotX.build/LastCaptureStore.d",
+    "object": "/Users/mac/.superset/projects/shotx/.build/arm64-apple-macosx/debug/ShotX.build/LastCaptureStore.swift.o",
+    "swiftmodule": "/Users/mac/.superset/projects/shotx/.build/arm64-apple-macosx/debug/ShotX.build/LastCaptureStore~partial.swiftmodule",
+    "swift-dependencies": "/Users/mac/.superset/projects/shotx/.build/arm64-apple-macosx/debug/ShotX.build/LastCaptureStore.swiftdeps"
+  },
   "/Users/mac/.superset/projects/shotx/Sources/ShotX/MainWindow.swift": {
     "dependencies": "/Users/mac/.superset/projects/shotx/.build/arm64-apple-macosx/debug/ShotX.build/MainWindow.d",
     "object": "/Users/mac/.superset/projects/shotx/.build/arm64-apple-macosx/debug/ShotX.build/MainWindow.swift.o",
@@ -49,6 +73,12 @@
     "object": "/Users/mac/.superset/projects/shotx/.build/arm64-apple-macosx/debug/ShotX.build/OverlayWindow.swift.o",
     "swiftmodule": "/Users/mac/.superset/projects/shotx/.build/arm64-apple-macosx/debug/ShotX.build/OverlayWindow~partial.swiftmodule",
     "swift-dependencies": "/Users/mac/.superset/projects/shotx/.build/arm64-apple-macosx/debug/ShotX.build/OverlayWindow.swiftdeps"
+  },
+  "/Users/mac/.superset/projects/shotx/Sources/ShotX/PinnedImage.swift": {
+    "dependencies": "/Users/mac/.superset/projects/shotx/.build/arm64-apple-macosx/debug/ShotX.build/PinnedImage.d",
+    "object": "/Users/mac/.superset/projects/shotx/.build/arm64-apple-macosx/debug/ShotX.build/PinnedImage.swift.o",
+    "swiftmodule": "/Users/mac/.superset/projects/shotx/.build/arm64-apple-macosx/debug/ShotX.build/PinnedImage~partial.swiftmodule",
+    "swift-dependencies": "/Users/mac/.superset/projects/shotx/.build/arm64-apple-macosx/debug/ShotX.build/PinnedImage.swiftdeps"
   },
   "/Users/mac/.superset/projects/shotx/Sources/ShotX/PostCapturePopup.swift": {
     "dependencies": "/Users/mac/.superset/projects/shotx/.build/arm64-apple-macosx/debug/ShotX.build/PostCapturePopup.d",
@@ -79,6 +109,12 @@
     "object": "/Users/mac/.superset/projects/shotx/.build/arm64-apple-macosx/debug/ShotX.build/ShortcutStore.swift.o",
     "swiftmodule": "/Users/mac/.superset/projects/shotx/.build/arm64-apple-macosx/debug/ShotX.build/ShortcutStore~partial.swiftmodule",
     "swift-dependencies": "/Users/mac/.superset/projects/shotx/.build/arm64-apple-macosx/debug/ShotX.build/ShortcutStore.swiftdeps"
+  },
+  "/Users/mac/.superset/projects/shotx/Sources/ShotX/WindowCapture.swift": {
+    "dependencies": "/Users/mac/.superset/projects/shotx/.build/arm64-apple-macosx/debug/ShotX.build/WindowCapture.d",
+    "object": "/Users/mac/.superset/projects/shotx/.build/arm64-apple-macosx/debug/ShotX.build/WindowCapture.swift.o",
+    "swiftmodule": "/Users/mac/.superset/projects/shotx/.build/arm64-apple-macosx/debug/ShotX.build/WindowCapture~partial.swiftmodule",
+    "swift-dependencies": "/Users/mac/.superset/projects/shotx/.build/arm64-apple-macosx/debug/ShotX.build/WindowCapture.swiftdeps"
   },
   "/Users/mac/.superset/projects/shotx/Sources/ShotX/main.swift": {
     "dependencies": "/Users/mac/.superset/projects/shotx/.build/arm64-apple-macosx/debug/ShotX.build/main.d",
