@@ -1,0 +1,81 @@
+client:
+  name: basic
+  file-system: device-agnostic
+tools: {}
+targets:
+  "PackageStructure": ["<PackageStructure>"]
+  "ShotX-debug.exe": ["<ShotX-debug.exe>"]
+  "ShotX-debug.module": ["<ShotX-debug.module>"]
+  "main": ["<ShotX-debug.exe>","<ShotX-debug.module>"]
+  "test": ["<ShotX-debug.exe>","<ShotX-debug.module>"]
+default: "main"
+nodes:
+  "/Users/mac/.superset/projects/shotx/Sources/ShotX/":
+    is-directory-structure: true
+    content-exclusion-patterns: [".git",".build"]
+  "/Users/mac/.superset/projects/shotx/.build/arm64-apple-macosx/debug/ShotX":
+    is-mutated: true
+commands:
+  "/Users/mac/.superset/projects/shotx/.build/arm64-apple-macosx/debug/ShotX-entitlement.plist":
+    tool: write-auxiliary-file
+    inputs: ["<entitlement-plist>","<com.apple.security.get-task-allow>"]
+    outputs: ["/Users/mac/.superset/projects/shotx/.build/arm64-apple-macosx/debug/ShotX-entitlement.plist"]
+    description: "Write auxiliary file /Users/mac/.superset/projects/shotx/.build/arm64-apple-macosx/debug/ShotX-entitlement.plist"
+
+  "/Users/mac/.superset/projects/shotx/.build/arm64-apple-macosx/debug/ShotX.build/sources":
+    tool: write-auxiliary-file
+    inputs: ["<sources-file-list>","/Users/mac/.superset/projects/shotx/Sources/ShotX/AppDelegate.swift","/Users/mac/.superset/projects/shotx/Sources/ShotX/HotKeyManager.swift","/Users/mac/.superset/projects/shotx/Sources/ShotX/OverlayController.swift","/Users/mac/.superset/projects/shotx/Sources/ShotX/OverlayWindow.swift","/Users/mac/.superset/projects/shotx/Sources/ShotX/ScreenCapture.swift","/Users/mac/.superset/projects/shotx/Sources/ShotX/SelectionView.swift","/Users/mac/.superset/projects/shotx/Sources/ShotX/main.swift"]
+    outputs: ["/Users/mac/.superset/projects/shotx/.build/arm64-apple-macosx/debug/ShotX.build/sources"]
+    description: "Write auxiliary file /Users/mac/.superset/projects/shotx/.build/arm64-apple-macosx/debug/ShotX.build/sources"
+
+  "/Users/mac/.superset/projects/shotx/.build/arm64-apple-macosx/debug/ShotX.product/Objects.LinkFileList":
+    tool: write-auxiliary-file
+    inputs: ["<link-file-list>","/Users/mac/.superset/projects/shotx/.build/arm64-apple-macosx/debug/ShotX.build/AppDelegate.swift.o","/Users/mac/.superset/projects/shotx/.build/arm64-apple-macosx/debug/ShotX.build/HotKeyManager.swift.o","/Users/mac/.superset/projects/shotx/.build/arm64-apple-macosx/debug/ShotX.build/OverlayController.swift.o","/Users/mac/.superset/projects/shotx/.build/arm64-apple-macosx/debug/ShotX.build/OverlayWindow.swift.o","/Users/mac/.superset/projects/shotx/.build/arm64-apple-macosx/debug/ShotX.build/ScreenCapture.swift.o","/Users/mac/.superset/projects/shotx/.build/arm64-apple-macosx/debug/ShotX.build/SelectionView.swift.o","/Users/mac/.superset/projects/shotx/.build/arm64-apple-macosx/debug/ShotX.build/main.swift.o"]
+    outputs: ["/Users/mac/.superset/projects/shotx/.build/arm64-apple-macosx/debug/ShotX.product/Objects.LinkFileList"]
+    description: "Write auxiliary file /Users/mac/.superset/projects/shotx/.build/arm64-apple-macosx/debug/ShotX.product/Objects.LinkFileList"
+
+  "/Users/mac/.superset/projects/shotx/.build/arm64-apple-macosx/debug/swift-version--58304C5D6DBC2206.txt":
+    tool: write-auxiliary-file
+    inputs: ["<swift-get-version>","/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/swiftc"]
+    outputs: ["/Users/mac/.superset/projects/shotx/.build/arm64-apple-macosx/debug/swift-version--58304C5D6DBC2206.txt"]
+    always-out-of-date: "true"
+    description: "Write auxiliary file /Users/mac/.superset/projects/shotx/.build/arm64-apple-macosx/debug/swift-version--58304C5D6DBC2206.txt"
+
+  "<ShotX-debug.exe>":
+    tool: phony
+    inputs: ["<ShotX-debug.exe-CodeSigning>"]
+    outputs: ["<ShotX-debug.exe>"]
+
+  "<ShotX-debug.module>":
+    tool: phony
+    inputs: ["/Users/mac/.superset/projects/shotx/.build/arm64-apple-macosx/debug/ShotX.build/AppDelegate.swift.o","/Users/mac/.superset/projects/shotx/.build/arm64-apple-macosx/debug/ShotX.build/HotKeyManager.swift.o","/Users/mac/.superset/projects/shotx/.build/arm64-apple-macosx/debug/ShotX.build/OverlayController.swift.o","/Users/mac/.superset/projects/shotx/.build/arm64-apple-macosx/debug/ShotX.build/OverlayWindow.swift.o","/Users/mac/.superset/projects/shotx/.build/arm64-apple-macosx/debug/ShotX.build/ScreenCapture.swift.o","/Users/mac/.superset/projects/shotx/.build/arm64-apple-macosx/debug/ShotX.build/SelectionView.swift.o","/Users/mac/.superset/projects/shotx/.build/arm64-apple-macosx/debug/ShotX.build/main.swift.o","/Users/mac/.superset/projects/shotx/.build/arm64-apple-macosx/debug/ShotX.swiftmodule"]
+    outputs: ["<ShotX-debug.module>"]
+
+  "C.ShotX-debug.exe":
+    tool: shell
+    inputs: ["/Users/mac/.superset/projects/shotx/.build/arm64-apple-macosx/debug/ShotX.build/AppDelegate.swift.o","/Users/mac/.superset/projects/shotx/.build/arm64-apple-macosx/debug/ShotX.build/HotKeyManager.swift.o","/Users/mac/.superset/projects/shotx/.build/arm64-apple-macosx/debug/ShotX.build/OverlayController.swift.o","/Users/mac/.superset/projects/shotx/.build/arm64-apple-macosx/debug/ShotX.build/OverlayWindow.swift.o","/Users/mac/.superset/projects/shotx/.build/arm64-apple-macosx/debug/ShotX.build/ScreenCapture.swift.o","/Users/mac/.superset/projects/shotx/.build/arm64-apple-macosx/debug/ShotX.build/SelectionView.swift.o","/Users/mac/.superset/projects/shotx/.build/arm64-apple-macosx/debug/ShotX.build/main.swift.o","/Users/mac/.superset/projects/shotx/.build/arm64-apple-macosx/debug/ShotX.product/Objects.LinkFileList"]
+    outputs: ["/Users/mac/.superset/projects/shotx/.build/arm64-apple-macosx/debug/ShotX"]
+    description: "Linking ./.build/arm64-apple-macosx/debug/ShotX"
+    args: ["/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/swiftc","-L","/Users/mac/.superset/projects/shotx/.build/arm64-apple-macosx/debug","-o","/Users/mac/.superset/projects/shotx/.build/arm64-apple-macosx/debug/ShotX","-module-name","ShotX","-emit-executable","-Xlinker","-alias","-Xlinker","_ShotX_main","-Xlinker","_main","-Xlinker","-rpath","-Xlinker","@loader_path","@/Users/mac/.superset/projects/shotx/.build/arm64-apple-macosx/debug/ShotX.product/Objects.LinkFileList","-target","arm64-apple-macosx13.0","-Xlinker","-add_ast_path","-Xlinker","/Users/mac/.superset/projects/shotx/.build/arm64-apple-macosx/debug/ShotX.swiftmodule","-sdk","/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk","-F","/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/Library/Frameworks","-I","/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/usr/lib","-L","/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/usr/lib","-g"]
+
+  "C.ShotX-debug.exe-entitlements":
+    tool: shell
+    inputs: ["/Users/mac/.superset/projects/shotx/.build/arm64-apple-macosx/debug/ShotX","/Users/mac/.superset/projects/shotx/.build/arm64-apple-macosx/debug/ShotX-entitlement.plist"]
+    outputs: ["<ShotX-debug.exe-CodeSigning>"]
+    description: "Applying debug entitlements to ./.build/arm64-apple-macosx/debug/ShotX"
+    args: ["codesign","--force","--sign","-","--entitlements","/Users/mac/.superset/projects/shotx/.build/arm64-apple-macosx/debug/ShotX-entitlement.plist","/Users/mac/.superset/projects/shotx/.build/arm64-apple-macosx/debug/ShotX"]
+
+  "C.ShotX-debug.module":
+    tool: shell
+    inputs: ["/Users/mac/.superset/projects/shotx/Sources/ShotX/AppDelegate.swift","/Users/mac/.superset/projects/shotx/Sources/ShotX/HotKeyManager.swift","/Users/mac/.superset/projects/shotx/Sources/ShotX/OverlayController.swift","/Users/mac/.superset/projects/shotx/Sources/ShotX/OverlayWindow.swift","/Users/mac/.superset/projects/shotx/Sources/ShotX/ScreenCapture.swift","/Users/mac/.superset/projects/shotx/Sources/ShotX/SelectionView.swift","/Users/mac/.superset/projects/shotx/Sources/ShotX/main.swift","/Users/mac/.superset/projects/shotx/.build/arm64-apple-macosx/debug/swift-version--58304C5D6DBC2206.txt","/Users/mac/.superset/projects/shotx/.build/arm64-apple-macosx/debug/ShotX.build/sources"]
+    outputs: ["/Users/mac/.superset/projects/shotx/.build/arm64-apple-macosx/debug/ShotX.build/AppDelegate.swift.o","/Users/mac/.superset/projects/shotx/.build/arm64-apple-macosx/debug/ShotX.build/HotKeyManager.swift.o","/Users/mac/.superset/projects/shotx/.build/arm64-apple-macosx/debug/ShotX.build/OverlayController.swift.o","/Users/mac/.superset/projects/shotx/.build/arm64-apple-macosx/debug/ShotX.build/OverlayWindow.swift.o","/Users/mac/.superset/projects/shotx/.build/arm64-apple-macosx/debug/ShotX.build/ScreenCapture.swift.o","/Users/mac/.superset/projects/shotx/.build/arm64-apple-macosx/debug/ShotX.build/SelectionView.swift.o","/Users/mac/.superset/projects/shotx/.build/arm64-apple-macosx/debug/ShotX.build/main.swift.o","/Users/mac/.superset/projects/shotx/.build/arm64-apple-macosx/debug/ShotX.swiftmodule"]
+    description: "Compiling Swift Module 'ShotX' (7 sources)"
+    args: ["/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/swiftc","-module-name","ShotX","-emit-dependencies","-emit-module","-emit-module-path","/Users/mac/.superset/projects/shotx/.build/arm64-apple-macosx/debug/ShotX.swiftmodule","-output-file-map","/Users/mac/.superset/projects/shotx/.build/arm64-apple-macosx/debug/ShotX.build/output-file-map.json","-incremental","-c","@/Users/mac/.superset/projects/shotx/.build/arm64-apple-macosx/debug/ShotX.build/sources","-I","/Users/mac/.superset/projects/shotx/.build/arm64-apple-macosx/debug","-target","arm64-apple-macosx13.0","-swift-version","5","-enable-batch-mode","-index-store-path","/Users/mac/.superset/projects/shotx/.build/arm64-apple-macosx/debug/index/store","-Onone","-enable-testing","-j8","-DSWIFT_PACKAGE","-DDEBUG","-module-cache-path","/Users/mac/.superset/projects/shotx/.build/arm64-apple-macosx/debug/ModuleCache","-parseable-output","-Xfrontend","-entry-point-function-name","-Xfrontend","ShotX_main","-color-diagnostics","-sdk","/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk","-F","/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/Library/Frameworks","-I","/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/usr/lib","-L","/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/usr/lib","-g","-Xcc","-isysroot","-Xcc","/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk","-Xcc","-F","-Xcc","/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/Library/Frameworks","-Xcc","-fPIC","-Xcc","-g","-package-name","shotx"]
+
+  "PackageStructure":
+    tool: package-structure-tool
+    inputs: ["/Users/mac/.superset/projects/shotx/Sources/ShotX/","/Users/mac/.superset/projects/shotx/Package.swift","/Users/mac/.superset/projects/shotx/Package.resolved"]
+    outputs: ["<PackageStructure>"]
+    description: "Planning build"
+    allow-missing-inputs: true
+

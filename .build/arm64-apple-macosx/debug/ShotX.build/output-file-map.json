@@ -1,0 +1,47 @@
+{
+  "": {
+    "swift-dependencies": "/Users/mac/.superset/projects/shotx/.build/arm64-apple-macosx/debug/ShotX.build/master.swiftdeps"
+  },
+  "/Users/mac/.superset/projects/shotx/Sources/ShotX/AppDelegate.swift": {
+    "dependencies": "/Users/mac/.superset/projects/shotx/.build/arm64-apple-macosx/debug/ShotX.build/AppDelegate.d",
+    "object": "/Users/mac/.superset/projects/shotx/.build/arm64-apple-macosx/debug/ShotX.build/AppDelegate.swift.o",
+    "swiftmodule": "/Users/mac/.superset/projects/shotx/.build/arm64-apple-macosx/debug/ShotX.build/AppDelegate~partial.swiftmodule",
+    "swift-dependencies": "/Users/mac/.superset/projects/shotx/.build/arm64-apple-macosx/debug/ShotX.build/AppDelegate.swiftdeps"
+  },
+  "/Users/mac/.superset/projects/shotx/Sources/ShotX/HotKeyManager.swift": {
+    "dependencies": "/Users/mac/.superset/projects/shotx/.build/arm64-apple-macosx/debug/ShotX.build/HotKeyManager.d",
+    "object": "/Users/mac/.superset/projects/shotx/.build/arm64-apple-macosx/debug/ShotX.build/HotKeyManager.swift.o",
+    "swiftmodule": "/Users/mac/.superset/projects/shotx/.build/arm64-apple-macosx/debug/ShotX.build/HotKeyManager~partial.swiftmodule",
+    "swift-dependencies": "/Users/mac/.superset/projects/shotx/.build/arm64-apple-macosx/debug/ShotX.build/HotKeyManager.swiftdeps"
+  },
+  "/Users/mac/.superset/projects/shotx/Sources/ShotX/OverlayController.swift": {
+    "dependencies": "/Users/mac/.superset/projects/shotx/.build/arm64-apple-macosx/debug/ShotX.build/OverlayController.d",
+    "object": "/Users/mac/.superset/projects/shotx/.build/arm64-apple-macosx/debug/ShotX.build/OverlayController.swift.o",
+    "swiftmodule": "/Users/mac/.superset/projects/shotx/.build/arm64-apple-macosx/debug/ShotX.build/OverlayController~partial.swiftmodule",
+    "swift-dependencies": "/Users/mac/.superset/projects/shotx/.build/arm64-apple-macosx/debug/ShotX.build/OverlayController.swiftdeps"
+  },
+  "/Users/mac/.superset/projects/shotx/Sources/ShotX/OverlayWindow.swift": {
+    "dependencies": "/Users/mac/.superset/projects/shotx/.build/arm64-apple-macosx/debug/ShotX.build/OverlayWindow.d",
+    "object": "/Users/mac/.superset/projects/shotx/.build/arm64-apple-macosx/debug/ShotX.build/OverlayWindow.swift.o",
+    "swiftmodule": "/Users/mac/.superset/projects/shotx/.build/arm64-apple-macosx/debug/ShotX.build/OverlayWindow~partial.swiftmodule",
+    "swift-dependencies": "/Users/mac/.superset/projects/shotx/.build/arm64-apple-macosx/debug/ShotX.build/OverlayWindow.swiftdeps"
+  },
+  "/Users/mac/.superset/projects/shotx/Sources/ShotX/ScreenCapture.swift": {
+    "dependencies": "/Users/mac/.superset/projects/shotx/.build/arm64-apple-macosx/debug/ShotX.build/ScreenCapture.d",
+    "object": "/Users/mac/.superset/projects/shotx/.build/arm64-apple-macosx/debug/ShotX.build/ScreenCapture.swift.o",
+    "swiftmodule": "/Users/mac/.superset/projects/shotx/.build/arm64-apple-macosx/debug/ShotX.build/ScreenCapture~partial.swiftmodule",
+    "swift-dependencies": "/Users/mac/.superset/projects/shotx/.build/arm64-apple-macosx/debug/ShotX.build/ScreenCapture.swiftdeps"
+  },
+  "/Users/mac/.superset/projects/shotx/Sources/ShotX/SelectionView.swift": {
+    "dependencies": "/Users/mac/.superset/projects/shotx/.build/arm64-apple-macosx/debug/ShotX.build/SelectionView.d",
+    "object": "/Users/mac/.superset/projects/shotx/.build/arm64-apple-macosx/debug/ShotX.build/SelectionView.swift.o",
+    "swiftmodule": "/Users/mac/.superset/projects/shotx/.build/arm64-apple-macosx/debug/ShotX.build/SelectionView~partial.swiftmodule",
+    "swift-dependencies": "/Users/mac/.superset/projects/shotx/.build/arm64-apple-macosx/debug/ShotX.build/SelectionView.swiftdeps"
+  },
+  "/Users/mac/.superset/projects/shotx/Sources/ShotX/main.swift": {
+    "dependencies": "/Users/mac/.superset/projects/shotx/.build/arm64-apple-macosx/debug/ShotX.build/main.d",
+    "object": "/Users/mac/.superset/projects/shotx/.build/arm64-apple-macosx/debug/ShotX.build/main.swift.o",
+    "swiftmodule": "/Users/mac/.superset/projects/shotx/.build/arm64-apple-macosx/debug/ShotX.build/main~partial.swiftmodule",
+    "swift-dependencies": "/Users/mac/.superset/projects/shotx/.build/arm64-apple-macosx/debug/ShotX.build/main.swiftdeps"
+  }
+}
