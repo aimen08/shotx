@@ -97,7 +97,7 @@ else
 fi
 
 # --- Push
-echo "→ Pushing $BRANCH…"
+echo "→ Pushing ${BRANCH}…"
 git push origin "$BRANCH"
 
 # --- Publish release (this also creates the tag at the current HEAD)
