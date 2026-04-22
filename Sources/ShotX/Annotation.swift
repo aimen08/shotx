@@ -729,6 +729,20 @@ struct SlickButtonStyle: ButtonStyle {
     }
 }
 
+final class CenteringClipView: NSClipView {
+    override func constrainBoundsRect(_ proposedBounds: NSRect) -> NSRect {
+        var rect = super.constrainBoundsRect(proposedBounds)
+        guard let docView = documentView else { return rect }
+        if rect.width > docView.frame.width {
+            rect.origin.x = (docView.frame.width - rect.width) / 2
+        }
+        if rect.height > docView.frame.height {
+            rect.origin.y = (docView.frame.height - rect.height) / 2
+        }
+        return rect
+    }
+}
+
 final class AnnotationWindowController: NSObject, NSWindowDelegate {
     private var window: NSWindow?
     private var canvas: AnnotationCanvas?
@@ -761,7 +775,13 @@ final class AnnotationWindowController: NSObject, NSWindowDelegate {
         scroll.autohidesScrollers = true
         scroll.borderType = .noBorder
         scroll.drawsBackground = true
-        scroll.backgroundColor = NSColor(white: 0.12, alpha: 1)
+        scroll.backgroundColor = NSColor(white: 0.11, alpha: 1)
+
+        let centering = CenteringClipView(frame: scroll.contentView.bounds)
+        centering.drawsBackground = true
+        centering.backgroundColor = NSColor(white: 0.11, alpha: 1)
+        scroll.contentView = centering
+
         scroll.documentView = canvas
         scroll.translatesAutoresizingMaskIntoConstraints = false
 
@@ -788,8 +808,10 @@ final class AnnotationWindowController: NSObject, NSWindowDelegate {
             scroll.bottomAnchor.constraint(equalTo: container.bottomAnchor)
         ])
 
-        let contentW = min(max(image.size.width + 40, 880), 1300)
-        let contentH = min(image.size.height + 120, 900)
+        let horizontalPadding: CGFloat = 200
+        let verticalPadding: CGFloat = 220
+        let contentW = min(max(image.size.width + horizontalPadding, 920), 1400)
+        let contentH = min(max(image.size.height + verticalPadding, 560), 960)
         let window = NSWindow(
             contentRect: NSRect(x: 0, y: 0, width: contentW, height: contentH),
             styleMask: [.titled, .closable, .resizable, .miniaturizable, .fullSizeContentView],

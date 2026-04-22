@@ -4,9 +4,12 @@ final class OverlayController {
     private var windows: [OverlayWindow] = []
     private var completion: ((NSImage?) -> Void)?
     private var finished = false
+    private var cursorPushed = false
 
     func begin(completion: @escaping (NSImage?) -> Void) {
         self.completion = completion
+
+        NSApp.activate(ignoringOtherApps: true)
 
         for screen in NSScreen.screens {
             let window = OverlayWindow(
@@ -19,9 +22,14 @@ final class OverlayController {
                 }
             )
             windows.append(window)
-            window.orderFrontRegardless()
+            window.makeKeyAndOrderFront(nil)
         }
-        NSApp.activate(ignoringOtherApps: true)
+
+        // Cursor rects only activate on the key window, and across multiple
+        // screens only one window is key. Push the crosshair globally so it
+        // shows immediately on every screen without requiring a click.
+        NSCursor.crosshair.push()
+        cursorPushed = true
     }
 
     private func finish(with rectInScreen: CGRect?, screen: NSScreen?) {
@@ -34,7 +42,6 @@ final class OverlayController {
             return
         }
 
-        // Give the overlay a moment to actually leave the screen before capturing.
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.12) { [weak self] in
             let image = ScreenCapture.capture(rectInScreenCoords: rect, screen: screen)
             self?.completion?(image)
@@ -42,6 +49,10 @@ final class OverlayController {
     }
 
     private func closeWindows() {
+        if cursorPushed {
+            NSCursor.pop()
+            cursorPushed = false
+        }
         for w in windows { w.orderOut(nil) }
         windows.removeAll()
     }
