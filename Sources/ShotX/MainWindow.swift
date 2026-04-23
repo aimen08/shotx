@@ -454,7 +454,7 @@ struct SettingsView: View {
                     subtitle: "ShotX · lightweight screen capture"
                 ) {
                     HStack {
-                        Text("Version 1.0")
+                        Text("Version \(Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "—")")
                             .font(.system(size: 13))
                             .foregroundStyle(.secondary)
                         Spacer()

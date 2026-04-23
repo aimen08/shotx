@@ -22,6 +22,16 @@ final class OverlayController {
                     self?.finish(with: nil, screen: nil)
                 }
             )
+            // Re-apply the crosshair exactly when the window becomes key —
+            // catches the case where activation happens after our initial
+            // cursor attempts.
+            NotificationCenter.default.addObserver(
+                forName: NSWindow.didBecomeKeyNotification,
+                object: window,
+                queue: .main
+            ) { _ in
+                NSCursor.crosshair.set()
+            }
             windows.append(window)
             window.orderFrontRegardless()
         }
@@ -40,36 +50,30 @@ final class OverlayController {
         // WindowServer tracks separately based on the last real mouse event.
         NSCursor.crosshair.set()
 
-        // Without a real mouse event WindowServer keeps showing whatever
-        // cursor the previous app had. Force re-evaluation via two stacked
-        // mechanisms since neither is 100% reliable on its own.
+        // Decouple-and-warp: detach the on-screen cursor from physical mouse
+        // motion, warp it to its current position, re-attach. This forces
+        // WindowServer to fully re-evaluate which cursor should be displayed
+        // without any visible jitter. More reliable than synthesised events,
+        // which can be dropped by the event tap machinery.
         DispatchQueue.main.async {
-            NSCursor.crosshair.set()
             guard let primary = NSScreen.screens.first else { return }
-            let mouseLoc = NSEvent.mouseLocation
-            let cgY = primary.frame.height - mouseLoc.y
-            let cgPoint = CGPoint(x: mouseLoc.x, y: cgY)
+            let loc = NSEvent.mouseLocation
+            let cgPoint = CGPoint(x: loc.x, y: primary.frame.height - loc.y)
 
-            // 1) Synthesize a mouse-moved event at the session tap. Session-
-            //    level doesn't require Accessibility permission the way
-            //    cghidEventTap does, so this actually fires for ad-hoc users.
-            if let event = CGEvent(
-                mouseEventSource: nil,
-                mouseType: .mouseMoved,
-                mouseCursorPosition: cgPoint,
-                mouseButton: .left
-            ) {
-                event.post(tap: .cgSessionEventTap)
-            }
-
-            // 2) Warp the cursor 1px away and back. The tiny jitter is barely
-            //    perceptible and guarantees WindowServer re-evaluates cursor.
-            let jitter = CGPoint(x: mouseLoc.x + 1, y: cgY)
-            CGWarpMouseCursorPosition(jitter)
+            CGAssociateMouseAndMouseCursorPosition(0)
             CGWarpMouseCursorPosition(cgPoint)
             CGAssociateMouseAndMouseCursorPosition(1)
 
             NSCursor.crosshair.set()
+        }
+
+        // Aggressive retry: set the cursor on multiple upcoming frames to
+        // cover any timing where the overlay window hadn't become key yet
+        // when the earlier calls happened.
+        for delay in [0.016, 0.033, 0.05, 0.1] {
+            DispatchQueue.main.asyncAfter(deadline: .now() + delay) {
+                NSCursor.crosshair.set()
+            }
         }
     }
 
@@ -94,7 +98,10 @@ final class OverlayController {
             NSCursor.pop()
             cursorPushed = false
         }
-        for w in windows { w.orderOut(nil) }
+        for w in windows {
+            NotificationCenter.default.removeObserver(self, name: NSWindow.didBecomeKeyNotification, object: w)
+            w.orderOut(nil)
+        }
         windows.removeAll()
     }
 }
