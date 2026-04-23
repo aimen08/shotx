@@ -8,7 +8,7 @@
 
 
 **Modern macOS screen capture for the menu bar.**
-Screenshots, screen recording, GIF export, in-place annotation, and a searchable history — without ever leaving your keyboard.
+Screenshots, screen recording, GIF export, in-place annotation, color picker, and a searchable history — without ever leaving your keyboard.
 
 ![macOS](https://img.shields.io/badge/macOS-13%2B-007AFF?style=flat&logo=apple&logoColor=white)
 ![Swift](https://img.shields.io/badge/Swift-5.9-F05138?style=flat&logo=swift&logoColor=white)
@@ -52,11 +52,18 @@ Screenshots, screen recording, GIF export, in-place annotation, and a searchable
 - Double-click: image → copy, video/GIF → play in default app
 - Right-click for full menu (Reveal, Delete, …)
 
+### 🎨 Color picker
+- Native `NSColorSampler` loupe — click any pixel on any screen
+- Hex value (`#FF8C00`) copied to clipboard with a color-tinted toast
+- Configurable global shortcut (default `⌥⇧C`)
+
 ### ⚡ Quick access
 - **All-In-One** floating capture palette at the cursor
 - **Pin to screen** — float a screenshot above all apps with hover actions
+- **Drag-out** — drag screenshots straight from the popup into Slack / Mail / Finder
 - **Show Desktop Icons** toggle (defaults + `killall Finder`)
-- Configurable global shortcut, **live re-registration** on change
+- **Auto-updates** via [Sparkle](https://sparkle-project.org/) — prompts when a new version ships
+- Two configurable global shortcuts, **live re-registration** on change
 - Menu-bar accessory app — no Dock icon
 
 ---
@@ -66,12 +73,13 @@ Screenshots, screen recording, GIF export, in-place annotation, and a searchable
 | Action                  | Shortcut |
 |-------------------------|----------|
 | Capture region          | `⌥X`     |
+| Pick color              | `⌥⇧C`    |
 | Stop recording          | `⌘.`     |
 | Open from clipboard     | `⇧⌘V`    |
 | Settings                | `⌘,`     |
 | Quit                    | `⌘Q`     |
 
-The capture shortcut is configurable in **Settings** — changes apply immediately, no restart needed.
+Both the capture and color-picker shortcuts are configurable in **Settings → Shortcuts** — changes apply immediately, no restart needed.
 
 ---
 
@@ -103,7 +111,7 @@ open dist/ShotX.app
 
 # Bundle as DMG installer
 ./Scripts/make-dmg.sh
-open dist/ShotX-1.0.dmg
+open dist/ShotX-*.dmg
 
 # Regenerate the app icon (only if you change the design)
 ./Scripts/make-icon.swift
@@ -129,6 +137,24 @@ By default, builds are **ad-hoc signed**, which means each rebuild produces a ne
 4. Future `Scripts/build-app.sh` / `Scripts/release.sh` runs sign with that cert. The first install still triggers a Gatekeeper "from unidentified developer" warning (right-click → Open once); subsequent updates run silently and **Screen Recording permission persists**.
 
 Alternative: set `CODE_SIGN_IDENTITY` env var per-build instead of the file.
+
+## Auto-updates (Sparkle)
+
+Each release ships a signed DMG and an entry in `appcast.xml`; existing installs poll it daily and prompt when a new version is available.
+
+First-time setup (one-time, per machine):
+
+```bash
+./Scripts/sparkle-setup.sh
+```
+
+This downloads Sparkle's CLI tools into `.sparkle-tools/` and generates an Ed25519 key pair. The **private key** stays in your Keychain; the **public key** is saved to `.sparkle-public-key` (committed — it's embedded in the app at build time).
+
+After setup, `Scripts/release.sh` automatically:
+1. Signs the DMG with `sign_update` (Ed25519 signature over the file bytes)
+2. Appends a new `<item>` to `appcast.xml` with the signature
+3. Commits both source and appcast changes in one commit
+4. Pushes, then publishes the GitHub release with the signed DMG
 
 ## Project layout
 
@@ -161,6 +187,9 @@ Alternative: set `CODE_SIGN_IDENTITY` env var per-build instead of the file.
 | `FloatingPanels.swift`            | Countdown + toast controllers                     |
 | `LastCaptureStore.swift`          | Persist last region for "Capture Previous"        |
 | `ImageSaver.swift`                | PNG encode + clipboard + Desktop save             |
+| `ColorPicker.swift`               | NSColorSampler wrapper + hex-to-clipboard         |
+| `Permission.swift`                | Screen Recording permission prompt controller     |
+| `Updater.swift`                   | Sparkle auto-update bootstrap                     |
 
 ### Storage
 
@@ -170,6 +199,7 @@ Alternative: set `CODE_SIGN_IDENTITY` env var per-build instead of the file.
 
 `UserDefaults`:
 - `com.shotx.shortcut` — capture shortcut combo
+- `com.shotx.colorPickerShortcut` — color-picker shortcut combo
 - `com.shotx.lastCapture` — last region rect + screen index
 
 ---
