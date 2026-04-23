@@ -110,9 +110,21 @@ cat > "$CONTENTS/Info.plist" <<EOF
 </plist>
 EOF
 
-# Ad-hoc sign so Gatekeeper allows the app to launch locally
-echo "→ Ad-hoc code signing"
-codesign --force --deep --sign - "$APP"
+# Code signing identity. Defaults to ad-hoc ("-"). For stable Screen Recording
+# permission across rebuilds, create a self-signed cert in Keychain Access and
+# put its name in .signing-identity (or set CODE_SIGN_IDENTITY env var).
+SIGN_IDENTITY="${CODE_SIGN_IDENTITY:-}"
+if [ -z "$SIGN_IDENTITY" ] && [ -f ".signing-identity" ]; then
+    SIGN_IDENTITY=$(tr -d '\n' < .signing-identity)
+fi
+SIGN_IDENTITY="${SIGN_IDENTITY:--}"
+
+if [ "$SIGN_IDENTITY" = "-" ]; then
+    echo "→ Ad-hoc code signing (set .signing-identity for stable identity)"
+else
+    echo "→ Code signing with identity: $SIGN_IDENTITY"
+fi
+codesign --force --deep --sign "$SIGN_IDENTITY" "$APP"
 
 echo
 echo "✓ Built $APP"

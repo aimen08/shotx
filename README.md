@@ -113,6 +113,20 @@ open dist/ShotX-1.0.dmg
 
 ---
 
+## Stable code signing (optional, recommended)
+
+By default, builds are **ad-hoc signed**, which means each rebuild produces a new code identity and macOS revokes Screen Recording permission on every update. To keep permissions persistent across updates without paying for an Apple Developer ID:
+
+1. Open **Keychain Access** → menu **Keychain Access → Certificate Assistant → Create a Certificate…**
+2. Name it (e.g., `ShotX Signing`), Identity Type **Self Signed Root**, Certificate Type **Code Signing**, click Create
+3. Save the cert name to `.signing-identity` (gitignored, per-machine):
+   ```bash
+   echo "ShotX Signing" > .signing-identity
+   ```
+4. Future `Scripts/build-app.sh` / `Scripts/release.sh` runs sign with that cert. The first install still triggers a Gatekeeper "from unidentified developer" warning (right-click → Open once); subsequent updates run silently and **Screen Recording permission persists**.
+
+Alternative: set `CODE_SIGN_IDENTITY` env var per-build instead of the file.
+
 ## Project layout
 
 | File                              | Role                                              |

@@ -8,3 +8,4 @@ DerivedData/
 dist/
 Resources/AppIcon.iconset/
 .sparkle-tools/
+.signing-identity
