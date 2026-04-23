@@ -135,9 +135,14 @@ final class RecordingController {
             }
         }
 
+        // Extract Sendable primitives from NSScreen so we don't have to send the
+        // class instance across the actor boundary into the Task.
+        let display = CaptureDisplay(screen)
+        let showsCursor = options.showCursor
+
         Task { [weak self] in
             do {
-                try await recorder.start(rect: rect, screen: screen, showsCursor: options.showCursor)
+                try await recorder.start(rect: rect, display: display, showsCursor: showsCursor)
                 guard let self = self else { return }
                 self.isRecording = true
                 self.startDate = Date()
@@ -276,12 +281,14 @@ final class RecordingController {
 
         startDate = Date()
         elapsedTimer?.invalidate()
-        elapsedTimer = Timer.scheduledTimer(withTimeInterval: 0.25, repeats: true) { [weak self] _ in
+        let t = Timer(timeInterval: 0.25, repeats: true) { [weak self] _ in
             MainActor.assumeIsolated {
                 guard let self = self, let start = self.startDate else { return }
                 self.stopState.elapsed = Date().timeIntervalSince(start)
             }
         }
+        RunLoop.main.add(t, forMode: .common)
+        elapsedTimer = t
     }
 
     private func dismissStopPill() {

@@ -2,7 +2,7 @@ import Cocoa
 import SwiftUI
 
 enum AllInOneAction: Hashable {
-    case area, window, fullscreen, previous, timer
+    case area, window, fullscreen, previous, timer, record
 }
 
 final class AllInOneController {
@@ -18,10 +18,9 @@ final class AllInOneController {
             onSelect: { [weak self] action in
                 self?.dismiss()
                 onAction(action)
-            },
-            onCancel: { [weak self] in self?.dismiss() }
+            }
         )
-        let size = NSSize(width: 240, height: 260)
+        let size = NSSize(width: 460, height: 76)
         let hosting = NSHostingController(rootView: view)
         hosting.view.frame = NSRect(origin: .zero, size: size)
 
@@ -39,7 +38,7 @@ final class AllInOneController {
         panel.contentViewController = hosting
         panel.collectionBehavior = [.canJoinAllSpaces, .transient, .fullScreenAuxiliary]
 
-        let origin = Self.positionNearCursor(size: size)
+        let origin = Self.positionBottomCenter(size: size)
         panel.setFrame(NSRect(origin: origin, size: size), display: true)
         panel.orderFrontRegardless()
         self.panel = panel
@@ -58,117 +57,118 @@ final class AllInOneController {
         panel = nil
     }
 
-    private static func positionNearCursor(size: NSSize) -> NSPoint {
-        let mouse = NSEvent.mouseLocation
-        guard let screen = NSScreen.screens.first(where: { $0.frame.contains(mouse) }) ?? NSScreen.main
-        else { return .zero }
+    private static func positionBottomCenter(size: NSSize) -> NSPoint {
+        guard let screen = NSScreen.main else { return .zero }
         let vf = screen.visibleFrame
-        let margin: CGFloat = 12
-        var x = mouse.x - size.width / 2
-        var y = mouse.y - size.height - 16
-        if y < vf.minY + margin { y = mouse.y + 16 }
-        x = min(max(vf.minX + margin, x), vf.maxX - size.width - margin)
-        y = min(max(vf.minY + margin, y), vf.maxY - size.height - margin)
-        return NSPoint(x: x, y: y)
+        let liftAboveBottom: CGFloat = 80
+        return NSPoint(
+            x: vf.midX - size.width / 2,
+            y: vf.minY + liftAboveBottom
+        )
     }
 }
 
 private struct AllInOneView: View {
     let onSelect: (AllInOneAction) -> Void
-    let onCancel: () -> Void
 
     @State private var appeared = false
 
+    private var options: [Option] {
+        [
+            Option(action: .area,       icon: "viewfinder",       label: "Area",      enabled: true),
+            Option(action: .fullscreen, icon: "display",          label: "Fullscreen", enabled: true),
+            Option(action: .window,     icon: "macwindow",        label: "Window",    enabled: true),
+            Option(action: .previous,   icon: "arrow.clockwise",  label: "Previous",  enabled: LastCaptureStore.hasPrevious),
+            Option(action: .timer,      icon: "timer",            label: "Timer",     enabled: true),
+            Option(action: .record,     icon: "video.fill",       label: "Record",    enabled: true)
+        ]
+    }
+
     var body: some View {
-        VStack(spacing: 4) {
-            header
-            actionRow(icon: "rectangle.dashed", title: "Capture Area", kind: .area)
-            actionRow(icon: "macwindow", title: "Capture Window", kind: .window)
-            actionRow(icon: "display", title: "Capture Fullscreen", kind: .fullscreen)
-            actionRow(icon: "arrow.clockwise", title: "Previous Area", kind: .previous, enabled: LastCaptureStore.hasPrevious)
-            actionRow(icon: "timer", title: "Self-Timer (3s)", kind: .timer)
+        HStack(spacing: 2) {
+            ForEach(options) { option in
+                AllInOneOption(
+                    icon: option.icon,
+                    label: option.label,
+                    enabled: option.enabled
+                ) {
+                    onSelect(option.action)
+                }
+            }
         }
-        .padding(10)
+        .padding(.horizontal, 6)
+        .padding(.vertical, 6)
         .frame(maxWidth: .infinity, maxHeight: .infinity)
-        .background(.ultraThinMaterial)
-        .clipShape(RoundedRectangle(cornerRadius: 16))
-        .overlay(
-            RoundedRectangle(cornerRadius: 16)
-                .strokeBorder(Color.white.opacity(0.1), lineWidth: 1)
-        )
-        .shadow(color: .black.opacity(0.35), radius: 22, y: 8)
-        .scaleEffect(appeared ? 1 : 0.94)
+        .background(panelBackground)
+        .scaleEffect(appeared ? 1 : 0.95)
         .opacity(appeared ? 1 : 0)
+        .offset(y: appeared ? 0 : 10)
         .onAppear {
-            withAnimation(.spring(response: 0.34, dampingFraction: 0.78)) {
+            withAnimation(.spring(response: 0.32, dampingFraction: 0.82)) {
                 appeared = true
             }
         }
     }
 
-    private var header: some View {
-        HStack {
-            Text("Capture")
-                .font(.system(size: 11, weight: .semibold))
-                .foregroundStyle(.secondary)
-                .textCase(.uppercase)
-            Spacer()
-            Button(action: onCancel) {
-                Image(systemName: "xmark")
-                    .font(.system(size: 9, weight: .bold))
-                    .foregroundStyle(.secondary)
-                    .frame(width: 18, height: 18)
-                    .background(Color.primary.opacity(0.08))
-                    .clipShape(Circle())
-            }
-            .buttonStyle(.plain)
+    private var panelBackground: some View {
+        ZStack {
+            RoundedRectangle(cornerRadius: 18).fill(.ultraThinMaterial)
+            RoundedRectangle(cornerRadius: 18).fill(Color.black.opacity(0.32))
         }
-        .padding(.horizontal, 6)
-        .padding(.top, 4)
-        .padding(.bottom, 2)
+        .overlay(
+            RoundedRectangle(cornerRadius: 18)
+                .strokeBorder(Color.white.opacity(0.06), lineWidth: 0.5)
+        )
+        .shadow(color: .black.opacity(0.35), radius: 22, y: 8)
     }
 
-    @ViewBuilder
-    private func actionRow(icon: String, title: String, kind: AllInOneAction, enabled: Bool = true) -> some View {
-        AllInOneRow(icon: icon, title: title, enabled: enabled) {
-            onSelect(kind)
-        }
+    private struct Option: Identifiable {
+        let action: AllInOneAction
+        let icon: String
+        let label: String
+        let enabled: Bool
+        var id: AllInOneAction { action }
     }
 }
 
-private struct AllInOneRow: View {
+private struct AllInOneOption: View {
     let icon: String
-    let title: String
+    let label: String
     let enabled: Bool
     let action: () -> Void
     @State private var hovering = false
 
     var body: some View {
         Button(action: action) {
-            HStack(spacing: 10) {
+            VStack(spacing: 4) {
                 Image(systemName: icon)
-                    .font(.system(size: 13, weight: .semibold))
-                    .foregroundStyle(hovering && enabled ? Color.white : Color.primary.opacity(enabled ? 0.85 : 0.35))
-                    .frame(width: 26, height: 26)
-                    .background(
-                        RoundedRectangle(cornerRadius: 7)
-                            .fill(hovering && enabled ? Color.accentColor : Color.primary.opacity(0.08))
-                    )
-                Text(title)
-                    .font(.system(size: 12.5, weight: .medium))
-                    .foregroundStyle(enabled ? Color.primary : Color.secondary.opacity(0.7))
-                Spacer()
+                    .font(.system(size: 20, weight: .regular))
+                    .frame(height: 24)
+                Text(label)
+                    .font(.system(size: 10.5, weight: .medium))
             }
-            .padding(.horizontal, 8)
-            .padding(.vertical, 5)
+            .foregroundStyle(foreground)
+            .frame(width: 70, height: 56)
             .background(
-                RoundedRectangle(cornerRadius: 8)
-                    .fill(hovering && enabled ? Color.primary.opacity(0.06) : .clear)
+                RoundedRectangle(cornerRadius: 11)
+                    .fill(background)
             )
         }
         .buttonStyle(.plain)
         .disabled(!enabled)
         .onHover { hovering = $0 }
-        .animation(.easeOut(duration: 0.1), value: hovering)
+        .animation(.easeOut(duration: 0.12), value: hovering)
+    }
+
+    private var foreground: Color {
+        if !enabled { return Color.primary.opacity(0.32) }
+        if hovering { return Color.white }
+        return Color.primary.opacity(0.85)
+    }
+
+    private var background: Color {
+        if !enabled { return .clear }
+        if hovering { return Color.accentColor.opacity(0.9) }
+        return .clear
     }
 }

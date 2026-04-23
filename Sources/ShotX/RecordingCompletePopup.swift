@@ -23,7 +23,7 @@ final class RecordingCompletePopupController {
     private var panel: NSPanel?
     private var dismissTimer: Timer?
 
-    private static let popupSize = NSSize(width: 360, height: 132)
+    private static let popupSize = NSSize(width: 290, height: 116)
 
     func show(tempURL: URL, duration: TimeInterval, dimensions: CGSize) {
         dismiss()
@@ -72,7 +72,7 @@ final class RecordingCompletePopupController {
         panel.collectionBehavior = [.canJoinAllSpaces, .transient, .fullScreenAuxiliary]
 
         if let screen = NSScreen.main {
-            let margin: CGFloat = 24
+            let margin: CGFloat = 20
             let frame = NSRect(
                 x: screen.visibleFrame.minX + margin,
                 y: screen.visibleFrame.minY + margin,
@@ -162,53 +162,29 @@ private struct RecordingCompleteView: View {
 
     @State private var appeared = false
     @State private var thumbHovering = false
+    @State private var dragY: CGFloat = 0
+    @State private var dismissing = false
 
     var body: some View {
-        HStack(spacing: 14) {
-            thumbnailButton
-            VStack(alignment: .leading, spacing: 3) {
-                HStack(spacing: 5) {
-                    Image(systemName: "checkmark.circle.fill")
-                        .font(.system(size: 11, weight: .bold))
-                        .foregroundStyle(.green)
-                    Text(isGIF ? "GIF ready" : "Recording ready")
-                        .font(.system(size: 13, weight: .semibold))
-                }
-                Text("\(formatDuration(duration)) · \(Int(dimensions.width)) × \(Int(dimensions.height))")
-                    .font(.system(size: 11))
-                    .foregroundStyle(.secondary)
-
-                Spacer(minLength: 4)
-
-                HStack(spacing: 6) {
-                    ActionChip(icon: "square.and.arrow.down", label: "Save", prominent: false, action: onSave)
-                    ActionChip(icon: "doc.on.doc", label: "Copy", prominent: true, action: onCopy)
-                }
-            }
-            Spacer(minLength: 0)
-            Button(action: onDismiss) {
-                Image(systemName: "xmark")
-                    .font(.system(size: 9, weight: .bold))
-                    .foregroundStyle(.secondary)
-                    .frame(width: 20, height: 20)
-                    .background(Color.primary.opacity(0.08))
-                    .clipShape(Circle())
-            }
-            .buttonStyle(.plain)
-            .help("Dismiss (saves to Desktop silently)")
+        VStack(spacing: 6) {
+            handle
+            content
         }
-        .padding(14)
+        .padding(.horizontal, 12)
+        .padding(.top, 6)
+        .padding(.bottom, 10)
         .frame(maxWidth: .infinity, maxHeight: .infinity)
         .background(.ultraThinMaterial)
-        .clipShape(RoundedRectangle(cornerRadius: 16))
+        .clipShape(RoundedRectangle(cornerRadius: 14))
         .overlay(
-            RoundedRectangle(cornerRadius: 16)
+            RoundedRectangle(cornerRadius: 14)
                 .strokeBorder(Color.white.opacity(0.1), lineWidth: 1)
         )
-        .shadow(color: .black.opacity(0.32), radius: 22, y: 8)
-        .scaleEffect(appeared ? 1 : 0.92)
-        .opacity(appeared ? 1 : 0)
-        .offset(y: appeared ? 0 : 14)
+        .shadow(color: .black.opacity(0.32), radius: 18, y: 6)
+        .scaleEffect(appeared && !dismissing ? 1 : 0.92)
+        .opacity(appeared && !dismissing ? 1 : 0)
+        .offset(y: appeared ? dragY : 14)
+        .gesture(dragGesture)
         .onAppear {
             withAnimation(.spring(response: 0.4, dampingFraction: 0.78)) {
                 appeared = true
@@ -216,10 +192,43 @@ private struct RecordingCompleteView: View {
         }
     }
 
+    private var handle: some View {
+        Capsule()
+            .fill(Color.white.opacity(0.28))
+            .frame(width: 32, height: 4)
+            .contentShape(Rectangle().inset(by: -8))
+    }
+
+    private var content: some View {
+        HStack(spacing: 11) {
+            thumbnailButton
+            VStack(alignment: .leading, spacing: 3) {
+                HStack(spacing: 4) {
+                    Image(systemName: "checkmark.circle.fill")
+                        .font(.system(size: 10, weight: .bold))
+                        .foregroundStyle(.green)
+                    Text(isGIF ? "GIF ready" : "Recording ready")
+                        .font(.system(size: 12, weight: .semibold))
+                }
+                Text("\(formatDuration(duration)) · \(Int(dimensions.width))×\(Int(dimensions.height))")
+                    .font(.system(size: 10))
+                    .foregroundStyle(.secondary)
+
+                Spacer(minLength: 2)
+
+                HStack(spacing: 5) {
+                    PopupActionButton(icon: "square.and.arrow.down", label: "Save", prominent: false, action: onSave)
+                    PopupActionButton(icon: "doc.on.doc", label: "Copy", prominent: true, action: onCopy)
+                }
+            }
+            Spacer(minLength: 0)
+        }
+    }
+
     private var thumbnailButton: some View {
         Button(action: onPlay) {
             ZStack {
-                RoundedRectangle(cornerRadius: 10)
+                RoundedRectangle(cornerRadius: 8)
                     .fill(
                         LinearGradient(
                             colors: [Color.white.opacity(0.1), Color.black.opacity(0.18)],
@@ -231,28 +240,50 @@ private struct RecordingCompleteView: View {
                     Image(nsImage: thumbnail)
                         .resizable()
                         .aspectRatio(contentMode: .fit)
-                        .padding(4)
+                        .padding(3)
                 }
                 if thumbHovering {
-                    Color.black.opacity(0.28)
-                        .clipShape(RoundedRectangle(cornerRadius: 10))
+                    Color.black.opacity(0.3)
+                        .clipShape(RoundedRectangle(cornerRadius: 8))
                 }
                 Image(systemName: "play.circle.fill")
-                    .font(.system(size: thumbHovering ? 32 : 26, weight: .semibold))
+                    .font(.system(size: thumbHovering ? 26 : 22, weight: .semibold))
                     .foregroundStyle(.white.opacity(thumbHovering ? 1.0 : 0.88))
                     .shadow(color: .black.opacity(0.5), radius: 3, y: 1)
             }
-            .frame(width: 96, height: 96)
+            .frame(width: 70, height: 70)
             .overlay(
-                RoundedRectangle(cornerRadius: 10)
-                    .strokeBorder(Color.white.opacity(thumbHovering ? 0.4 : 0.18), lineWidth: 1)
+                RoundedRectangle(cornerRadius: 8)
+                    .strokeBorder(Color.white.opacity(thumbHovering ? 0.4 : 0.18), lineWidth: 0.5)
             )
-            .shadow(color: .black.opacity(0.25), radius: 6, y: 2)
+            .shadow(color: .black.opacity(0.25), radius: 4, y: 2)
         }
         .buttonStyle(.plain)
         .onHover { thumbHovering = $0 }
         .animation(.easeOut(duration: 0.15), value: thumbHovering)
         .help(isGIF ? "Open GIF" : "Play recording")
+    }
+
+    private var dragGesture: some Gesture {
+        DragGesture()
+            .onChanged { value in
+                dragY = max(0, value.translation.height)
+            }
+            .onEnded { value in
+                if value.translation.height > 40 {
+                    withAnimation(.easeOut(duration: 0.22)) {
+                        dragY = 200
+                        dismissing = true
+                    }
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.22) {
+                        onDismiss()
+                    }
+                } else {
+                    withAnimation(.spring(response: 0.3, dampingFraction: 0.72)) {
+                        dragY = 0
+                    }
+                }
+            }
     }
 
     private func formatDuration(_ t: TimeInterval) -> String {
@@ -264,38 +295,5 @@ private struct RecordingCompleteView: View {
             return String(format: "%d:%02d:%02d", hours, minutes % 60, seconds)
         }
         return String(format: "%d:%02d", minutes, seconds)
-    }
-}
-
-private struct ActionChip: View {
-    let icon: String
-    let label: String
-    let prominent: Bool
-    let action: () -> Void
-    @State private var hovering = false
-
-    var body: some View {
-        Button(action: action) {
-            HStack(spacing: 4) {
-                Image(systemName: icon)
-                    .font(.system(size: 10, weight: .bold))
-                Text(label)
-                    .font(.system(size: 11.5, weight: .semibold))
-            }
-            .padding(.horizontal, 10)
-            .padding(.vertical, 5)
-            .foregroundStyle(prominent ? Color.white : Color.primary)
-            .background(
-                RoundedRectangle(cornerRadius: 7)
-                    .fill(
-                        prominent
-                            ? Color.accentColor
-                            : Color.primary.opacity(hovering ? 0.12 : 0.08)
-                    )
-            )
-        }
-        .buttonStyle(.plain)
-        .onHover { hovering = $0 }
-        .animation(.easeOut(duration: 0.12), value: hovering)
     }
 }

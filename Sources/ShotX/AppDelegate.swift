@@ -57,14 +57,71 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
     private func setupStatusBar() {
         statusItem = NSStatusBar.system.statusItem(withLength: NSStatusItem.variableLength)
         if let button = statusItem.button {
-            button.image = NSImage(systemSymbolName: "scissors", accessibilityDescription: "ShotX")
-            button.image?.isTemplate = true
+            button.image = AppDelegate.menuBarIcon()
             button.toolTip = "ShotX"
         }
 
         let menu = NSMenu()
         menu.delegate = self
         statusItem.menu = menu
+    }
+
+    /// Renders the same viewfinder + X design as the app icon, monochrome,
+    /// for the menu bar (template image, auto-tints to system color).
+    private static func menuBarIcon() -> NSImage {
+        let s: CGFloat = 18
+        let img = NSImage(size: NSSize(width: s, height: s), flipped: false) { rect in
+            let inset = rect.width * 0.10
+            let cornerLen = rect.width * 0.28
+            let lineWidth = rect.width * 0.14
+            let frame = NSRect(
+                x: inset, y: inset,
+                width: rect.width - 2 * inset,
+                height: rect.height - 2 * inset
+            )
+
+            NSColor.black.setStroke()
+            let corners = NSBezierPath()
+            corners.lineWidth = lineWidth
+            corners.lineCapStyle = .round
+            corners.lineJoinStyle = .round
+
+            // Top-left
+            corners.move(to: NSPoint(x: frame.minX, y: frame.maxY - cornerLen))
+            corners.line(to: NSPoint(x: frame.minX, y: frame.maxY))
+            corners.line(to: NSPoint(x: frame.minX + cornerLen, y: frame.maxY))
+            // Top-right
+            corners.move(to: NSPoint(x: frame.maxX - cornerLen, y: frame.maxY))
+            corners.line(to: NSPoint(x: frame.maxX, y: frame.maxY))
+            corners.line(to: NSPoint(x: frame.maxX, y: frame.maxY - cornerLen))
+            // Bottom-right
+            corners.move(to: NSPoint(x: frame.maxX, y: frame.minY + cornerLen))
+            corners.line(to: NSPoint(x: frame.maxX, y: frame.minY))
+            corners.line(to: NSPoint(x: frame.maxX - cornerLen, y: frame.minY))
+            // Bottom-left
+            corners.move(to: NSPoint(x: frame.minX + cornerLen, y: frame.minY))
+            corners.line(to: NSPoint(x: frame.minX, y: frame.minY))
+            corners.line(to: NSPoint(x: frame.minX, y: frame.minY + cornerLen))
+            corners.stroke()
+
+            // Center X
+            let xR = rect.width * 0.07
+            let xLine = rect.width * 0.16
+            let cx = rect.width / 2
+            let cy = rect.height / 2
+            let xPath = NSBezierPath()
+            xPath.lineWidth = xLine
+            xPath.lineCapStyle = .round
+            xPath.move(to: NSPoint(x: cx - xR, y: cy - xR))
+            xPath.line(to: NSPoint(x: cx + xR, y: cy + xR))
+            xPath.move(to: NSPoint(x: cx + xR, y: cy - xR))
+            xPath.line(to: NSPoint(x: cx - xR, y: cy + xR))
+            xPath.stroke()
+
+            return true
+        }
+        img.isTemplate = true
+        return img
     }
 
     func menuNeedsUpdate(_ menu: NSMenu) {
@@ -184,31 +241,38 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
 
         menu.addItem(.separator())
 
-        let permissionsItem = menuItem(
-            title: "Permissions…",
-            symbol: "lock.shield",
-            action: #selector(openPermissions)
-        )
-        if !Permissions.screenRecordingGranted {
-            permissionsItem.title = "Permissions Needed…"
+        if Permissions.screenRecordingGranted {
+            let granted = NSMenuItem(title: "Permissions Granted", action: nil, keyEquivalent: "")
+            let config = NSImage.SymbolConfiguration(paletteColors: [NSColor.systemGreen])
+            let icon = NSImage(systemSymbolName: "checkmark.circle.fill", accessibilityDescription: nil)?
+                .withSymbolConfiguration(config)
+            icon?.isTemplate = false
+            granted.image = icon
+            granted.isEnabled = false
+            menu.addItem(granted)
+        } else {
+            menu.addItem(menuItem(
+                title: "Permissions Needed…",
+                symbol: "exclamationmark.shield",
+                action: #selector(openPermissions)
+            ))
         }
-        menu.addItem(permissionsItem)
 
         menu.addItem(menuItem(
             title: "About ShotX",
-            symbol: nil,
+            symbol: "info.circle",
             action: #selector(showAbout)
         ))
         menu.addItem(menuItem(
             title: "Settings…",
-            symbol: nil,
+            symbol: "gearshape",
             action: #selector(showSettings),
             keyEquivalent: ",",
             keyEquivalentModifiers: .command
         ))
         menu.addItem(menuItem(
             title: "Quit ShotX",
-            symbol: nil,
+            symbol: "power",
             action: #selector(quit),
             keyEquivalent: "q",
             keyEquivalentModifiers: .command
@@ -403,8 +467,8 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
             case .window:     self.captureWindow()
             case .fullscreen: self.captureFullscreen()
             case .previous:   self.capturePreviousArea()
+            case .record:     self.recordScreen()
             case .timer:
-                // Tag=3 replicates the 3-second path
                 let item = NSMenuItem()
                 item.tag = 3
                 self.captureAfterTimer(item)
@@ -446,18 +510,21 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
 
     private func handleCapturedImage(_ image: NSImage) {
         SoundEffect.shared.playShutter()
-        HistoryStore.shared.add(image)
+        let entry = HistoryStore.shared.add(image)
+        let fileURL = entry.map { HistoryStore.shared.fileURL(for: $0) }
         ImageSaver.copyToClipboard(image)
-        showPostCapturePopup(for: image)
+        showPostCapturePopup(for: image, fileURL: fileURL)
     }
 
-    private func showPostCapturePopup(for image: NSImage) {
-        popupController?.dismiss()
-        let controller = PostCapturePopupController()
-        popupController = controller
-        controller.show(image: image, onEdit: { [weak self] in
-            self?.openAnnotator(with: image)
-        })
+    private func showPostCapturePopup(for image: NSImage, fileURL: URL?) {
+        MainActor.assumeIsolated {
+            popupController?.dismiss()
+            let controller = PostCapturePopupController()
+            popupController = controller
+            controller.show(image: image, fileURL: fileURL, onEdit: { [weak self] in
+                self?.openAnnotator(with: image)
+            })
+        }
     }
 
     func openAnnotator(with image: NSImage) {
@@ -492,13 +559,44 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
 
     @objc private func showAbout() {
         NSApp.activate(ignoringOtherApps: true)
+
+        let credits = NSMutableAttributedString()
+        let baseAttrs: [NSAttributedString.Key: Any] = [
+            .font: NSFont.systemFont(ofSize: 11),
+            .foregroundColor: NSColor.labelColor,
+            .paragraphStyle: {
+                let p = NSMutableParagraphStyle()
+                p.alignment = .center
+                p.lineSpacing = 2
+                return p
+            }()
+        ]
+
+        credits.append(NSAttributedString(
+            string: "Modern macOS screen capture for the menu bar.\n\n",
+            attributes: baseAttrs
+        ))
+        credits.append(NSAttributedString(string: "Made by ", attributes: baseAttrs))
+        credits.append(NSAttributedString(
+            string: "@aimen08",
+            attributes: baseAttrs.merging([
+                .link: URL(string: "https://github.com/aimen08")!,
+                .foregroundColor: NSColor.linkColor
+            ]) { _, new in new }
+        ))
+        credits.append(NSAttributedString(string: "\n", attributes: baseAttrs))
+        credits.append(NSAttributedString(
+            string: "github.com/aimen08/shotx",
+            attributes: baseAttrs.merging([
+                .link: URL(string: "https://github.com/aimen08/shotx")!,
+                .foregroundColor: NSColor.linkColor
+            ]) { _, new in new }
+        ))
+
         NSApp.orderFrontStandardAboutPanel(options: [
             .applicationName: "ShotX",
             .applicationVersion: "1.0",
-            .credits: NSAttributedString(
-                string: "Lightweight screen capture for macOS.",
-                attributes: [.font: NSFont.systemFont(ofSize: 11)]
-            )
+            .credits: credits
         ])
     }
 

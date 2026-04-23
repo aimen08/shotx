@@ -74,6 +74,36 @@ struct HistoryView: View {
     private let cols = [GridItem(.adaptive(minimum: 210, maximum: 260), spacing: 16)]
 
     var body: some View {
+        VStack(spacing: 0) {
+            if !history.entries.isEmpty {
+                header
+                Divider()
+            }
+            content
+        }
+        .background(Color(NSColor.windowBackgroundColor))
+    }
+
+    private var header: some View {
+        HStack(spacing: 8) {
+            Text("\(history.entries.count) capture\(history.entries.count == 1 ? "" : "s")")
+                .font(.system(size: 12, weight: .medium))
+                .foregroundStyle(.secondary)
+            Spacer()
+            Button(role: .destructive) {
+                history.clear()
+            } label: {
+                Label("Clear All", systemImage: "trash")
+                    .font(.system(size: 12, weight: .medium))
+            }
+            .buttonStyle(.borderless)
+            .foregroundStyle(.red)
+        }
+        .padding(.horizontal, 16)
+        .padding(.vertical, 9)
+    }
+
+    private var content: some View {
         Group {
             if history.entries.isEmpty {
                 emptyState
@@ -88,7 +118,6 @@ struct HistoryView: View {
                 }
             }
         }
-        .background(Color(NSColor.windowBackgroundColor))
     }
 
     private var emptyState: some View {
@@ -147,7 +176,7 @@ struct HistoryCard: View {
     }
 
     private var thumbnailArea: some View {
-        ZStack(alignment: .bottom) {
+        ZStack {
             RoundedRectangle(cornerRadius: 10)
                 .fill(
                     LinearGradient(
@@ -167,36 +196,52 @@ struct HistoryCard: View {
                     .padding(8)
             }
 
+            // Centered play overlay for video / GIF
             if isMedia {
                 Image(systemName: "play.circle.fill")
-                    .font(.system(size: 30, weight: .semibold))
-                    .foregroundStyle(.white.opacity(0.92))
+                    .font(.system(size: 32, weight: .semibold))
+                    .foregroundStyle(.white)
                     .shadow(color: .black.opacity(0.55), radius: 4, y: 1)
             }
 
+            // Hover scrim + action row, anchored to bottom
             if hovering {
-                LinearGradient(
-                    colors: [.clear, .black.opacity(0.55)],
-                    startPoint: .center,
-                    endPoint: .bottom
-                )
-                .clipShape(RoundedRectangle(cornerRadius: 10))
-
-                HStack(spacing: 8) {
-                    if isMedia {
-                        HistoryActionButton(icon: "play.fill", tooltip: "Play", action: play)
-                        HistoryActionButton(icon: "doc.on.doc", tooltip: "Copy File", action: copyFile)
-                        HistoryActionButton(icon: "square.and.arrow.down", tooltip: "Save to Desktop", action: saveFile)
-                    } else {
-                        HistoryActionButton(icon: "pencil.tip", tooltip: "Edit", action: edit)
-                        HistoryActionButton(icon: "doc.on.doc", tooltip: "Copy", action: copy)
-                        HistoryActionButton(icon: "square.and.arrow.down", tooltip: "Save to Desktop", action: saveToDesktop)
+                VStack(spacing: 0) {
+                    Spacer()
+                    ZStack {
+                        LinearGradient(
+                            colors: [.clear, .black.opacity(0.6)],
+                            startPoint: .top,
+                            endPoint: .bottom
+                        )
+                        HStack(spacing: 8) {
+                            if isMedia {
+                                HistoryActionButton(icon: "play.fill", tooltip: "Play", action: play)
+                                HistoryActionButton(icon: "doc.on.doc", tooltip: "Copy File", action: copyFile)
+                                HistoryActionButton(icon: "square.and.arrow.down", tooltip: "Save to Desktop", action: saveFile)
+                            } else {
+                                HistoryActionButton(icon: "pencil.tip", tooltip: "Edit", action: edit)
+                                HistoryActionButton(icon: "doc.on.doc", tooltip: "Copy", action: copy)
+                                HistoryActionButton(icon: "square.and.arrow.down", tooltip: "Save to Desktop", action: saveToDesktop)
+                            }
+                        }
+                        .padding(.bottom, 8)
                     }
+                    .frame(height: 60)
                 }
-                .padding(.bottom, 10)
+                .clipShape(RoundedRectangle(cornerRadius: 10))
             }
 
-            kindBadge
+            // Type badge in top-left corner
+            VStack {
+                HStack {
+                    kindBadge
+                    Spacer()
+                }
+                Spacer()
+            }
+            .padding(7)
+            .allowsHitTesting(false)
         }
         .frame(height: 140)
         .overlay(
@@ -228,9 +273,6 @@ struct HistoryCard: View {
                 Capsule().fill(Color(nsColor: color))
             )
             .shadow(color: .black.opacity(0.4), radius: 2, y: 1)
-            .padding(7)
-            .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
-            .allowsHitTesting(false)
     }
 
     private var footer: some View {
@@ -340,7 +382,6 @@ private struct HistoryActionButton: View {
 
 struct SettingsView: View {
     @EnvironmentObject var shortcuts: ShortcutStore
-    @EnvironmentObject var history: HistoryStore
 
     var body: some View {
         ScrollView {
@@ -366,29 +407,6 @@ struct SettingsView: View {
                         Text("Click the field and press a new combination. Escape to cancel.")
                             .font(.system(size: 11))
                             .foregroundStyle(.secondary)
-                    }
-                }
-
-                SettingsCard(
-                    icon: "photo.stack.fill",
-                    tint: .purple,
-                    title: "Library",
-                    subtitle: "Your capture history"
-                ) {
-                    HStack {
-                        Text("\(history.entries.count) capture\(history.entries.count == 1 ? "" : "s") stored")
-                            .font(.system(size: 13))
-                            .foregroundStyle(.secondary)
-                        Spacer()
-                        Button(role: .destructive) {
-                            history.clear()
-                        } label: {
-                            Label("Clear All", systemImage: "trash")
-                                .font(.system(size: 12, weight: .medium))
-                        }
-                        .buttonStyle(.bordered)
-                        .controlSize(.small)
-                        .disabled(history.entries.isEmpty)
                     }
                 }
 

@@ -49,7 +49,9 @@ final class CountdownController {
         panel.orderFrontRegardless()
         self.panel = panel
 
-        timer = Timer.scheduledTimer(withTimeInterval: 1.0, repeats: true) { [weak self] t in
+        // Use .common runloop mode so the timer keeps firing even when the user
+        // is interacting with a menu (default mode is suspended during menu tracking).
+        let t = Timer(timeInterval: 1.0, repeats: true) { [weak self] t in
             guard let self = self, !self.cancelled else {
                 t.invalidate()
                 return
@@ -63,6 +65,8 @@ final class CountdownController {
                 state.seconds = remaining
             }
         }
+        RunLoop.main.add(t, forMode: .common)
+        timer = t
     }
 
     func cancel() {

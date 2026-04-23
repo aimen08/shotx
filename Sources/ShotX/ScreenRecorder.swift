@@ -14,6 +14,19 @@ enum ScreenRecorderError: LocalizedError {
     }
 }
 
+struct CaptureDisplay: Sendable {
+    let id: CGDirectDisplayID
+    let frame: CGRect
+    let backingScaleFactor: CGFloat
+
+    init(_ screen: NSScreen) {
+        let screenNumber = screen.deviceDescription[NSDeviceDescriptionKey("NSScreenNumber")] as? NSNumber
+        self.id = screenNumber?.uint32Value ?? CGMainDisplayID()
+        self.frame = screen.frame
+        self.backingScaleFactor = screen.backingScaleFactor
+    }
+}
+
 @available(macOS 13.0, *)
 final class ScreenRecorder: NSObject, @unchecked Sendable {
     private var stream: SCStream?
@@ -37,33 +50,31 @@ final class ScreenRecorder: NSObject, @unchecked Sendable {
         super.init()
     }
 
-    func start(rect: CGRect, screen: NSScreen, showsCursor: Bool) async throws {
+    func start(rect: CGRect, display: CaptureDisplay, showsCursor: Bool) async throws {
         let content = try await SCShareableContent.excludingDesktopWindows(
             false,
             onScreenWindowsOnly: true
         )
 
-        let screenNumber = screen.deviceDescription[NSDeviceDescriptionKey("NSScreenNumber")] as? NSNumber
-        let targetDisplayID = screenNumber?.uint32Value ?? CGMainDisplayID()
-        guard let display = content.displays.first(where: { $0.displayID == targetDisplayID })
+        guard let scDisplay = content.displays.first(where: { $0.displayID == display.id })
             ?? content.displays.first else {
             throw ScreenRecorderError.displayNotFound
         }
 
         // AppKit global → display-local CG coords (top-left origin).
-        let displayFrame = screen.frame
+        let displayFrame = display.frame
         let localX = rect.origin.x - displayFrame.origin.x
         let localYFromBottom = rect.origin.y - displayFrame.origin.y
         let localYFromTop = displayFrame.height - localYFromBottom - rect.height
         let sourceRect = CGRect(x: localX, y: localYFromTop, width: rect.width, height: rect.height)
 
-        let scale = screen.backingScaleFactor
+        let scale = display.backingScaleFactor
         let pixelWidth = Int(rect.width * scale)
         let pixelHeight = Int(rect.height * scale)
 
         let selfPID = NSRunningApplication.current.processIdentifier
         let excludeApps = content.applications.filter { $0.processID == selfPID }
-        let filter = SCContentFilter(display: display, excludingApplications: excludeApps, exceptingWindows: [])
+        let filter = SCContentFilter(display: scDisplay, excludingApplications: excludeApps, exceptingWindows: [])
 
         let config = SCStreamConfiguration()
         config.width = pixelWidth
