@@ -101,7 +101,7 @@ echo "→ Pushing ${BRANCH}…"
 git push origin "$BRANCH"
 
 # --- Publish release (this also creates the tag at the current HEAD)
-echo "→ Creating GitHub release $TAG…"
+echo "→ Creating GitHub release ${TAG}…"
 gh release create "$TAG" "$DMG_PATH" \
     --title "ShotX $TAG" \
     --notes "$(cat <<EOF
