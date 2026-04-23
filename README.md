@@ -1,6 +1,6 @@
 <div align="center">
 
-<img src="Resources/icon.png" width="160" alt="ShotX">
+<img src="https://raw.githubusercontent.com/aimen08/shotx/main/Resources/icon.png" width="160" alt="ShotX">
 
 # ShotX
 
