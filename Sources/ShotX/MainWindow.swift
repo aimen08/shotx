@@ -153,7 +153,9 @@ struct HistoryCard: View {
             thumbnailArea
             footer
         }
-        .onAppear { image = history.image(for: entry) }
+        .task(id: entry.id) {
+            image = await history.thumbnail(for: entry)
+        }
         .onHover { hovering = $0 }
         .animation(.easeOut(duration: 0.15), value: hovering)
         .contextMenu { contextMenuContent }
@@ -295,21 +297,28 @@ struct HistoryCard: View {
     }
 
     // MARK: - Actions (image)
+    //
+    // `image` is the downsampled thumbnail used for the grid. These actions
+    // need full-resolution pixels, so they re-load the source file each time.
+
+    private var fullImage: NSImage? {
+        history.image(for: entry)
+    }
 
     private func copy() {
-        guard let image = image else { return }
-        ImageSaver.copyToClipboard(image)
+        guard let img = fullImage else { return }
+        ImageSaver.copyToClipboard(img)
     }
 
     private func saveToDesktop() {
-        guard let image = image else { return }
-        ImageSaver.saveToDesktop(image)
+        guard let img = fullImage else { return }
+        ImageSaver.saveToDesktop(img)
     }
 
     private func edit() {
-        guard let image = image,
+        guard let img = fullImage,
               let appDelegate = NSApp.delegate as? AppDelegate else { return }
-        appDelegate.openAnnotator(with: image)
+        appDelegate.openAnnotator(with: img)
     }
 
     // MARK: - Actions (video / gif)
@@ -400,6 +409,20 @@ struct SettingsView: View {
                             ShortcutRecorder(shortcut: $shortcuts.shortcut)
                                 .frame(width: 150, height: 28)
                             Button("Reset") { shortcuts.shortcut = .default }
+                                .buttonStyle(.borderless)
+                                .foregroundStyle(.secondary)
+                                .font(.system(size: 12))
+                        }
+                        Rectangle()
+                            .fill(Color.primary.opacity(0.08))
+                            .frame(height: 0.5)
+                        HStack {
+                            Text("Capture fullscreen")
+                                .font(.system(size: 13))
+                            Spacer()
+                            ShortcutRecorder(shortcut: $shortcuts.fullscreenShortcut)
+                                .frame(width: 150, height: 28)
+                            Button("Reset") { shortcuts.fullscreenShortcut = .defaultFullscreen }
                                 .buttonStyle(.borderless)
                                 .foregroundStyle(.secondary)
                                 .font(.system(size: 12))

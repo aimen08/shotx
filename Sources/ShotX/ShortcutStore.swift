@@ -15,6 +15,11 @@ struct Shortcut: Codable, Equatable {
         keyCode: UInt32(kVK_ANSI_C),
         modifiers: UInt32(optionKey | shiftKey)
     )
+
+    static let defaultFullscreen = Shortcut(
+        keyCode: UInt32(kVK_ANSI_X),
+        modifiers: UInt32(optionKey | shiftKey)
+    )
 }
 
 final class ShortcutStore: ObservableObject {
@@ -28,12 +33,18 @@ final class ShortcutStore: ObservableObject {
         didSet { Self.persist(colorPickerShortcut, key: colorPickerKey) }
     }
 
+    @Published var fullscreenShortcut: Shortcut {
+        didSet { Self.persist(fullscreenShortcut, key: fullscreenKey) }
+    }
+
     private let captureKey = "com.shotx.shortcut"
     private let colorPickerKey = "com.shotx.colorPickerShortcut"
+    private let fullscreenKey = "com.shotx.fullscreenShortcut"
 
     init() {
         shortcut = Self.load(key: "com.shotx.shortcut") ?? .default
         colorPickerShortcut = Self.load(key: "com.shotx.colorPickerShortcut") ?? .defaultColorPicker
+        fullscreenShortcut = Self.load(key: "com.shotx.fullscreenShortcut") ?? .defaultFullscreen
     }
 
     private static func load(key: String) -> Shortcut? {

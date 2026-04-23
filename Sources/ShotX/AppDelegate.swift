@@ -7,6 +7,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
     private var statusItem: NSStatusItem!
     private var hotKeyManager: HotKeyManager!
     private var colorPickerHotKeyManager: HotKeyManager!
+    private var fullscreenHotKeyManager: HotKeyManager!
     private var overlayController: OverlayController?
     private var popupController: PostCapturePopupController?
     private var annotationController: AnnotationWindowController?
@@ -161,7 +162,8 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
         menu.addItem(menuItem(
             title: "Capture Fullscreen",
             symbol: "display",
-            action: #selector(captureFullscreen)
+            action: #selector(captureFullscreen),
+            shortcut: ShortcutStore.shared.fullscreenShortcut
         ))
 
         menu.addItem(menuItem(
@@ -323,9 +325,11 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
     private func setupHotKey() {
         hotKeyManager = HotKeyManager()
         colorPickerHotKeyManager = HotKeyManager()
+        fullscreenHotKeyManager = HotKeyManager()
 
         applyCaptureShortcut(ShortcutStore.shared.shortcut)
         applyColorPickerShortcut(ShortcutStore.shared.colorPickerShortcut)
+        applyFullscreenShortcut(ShortcutStore.shared.fullscreenShortcut)
 
         // @Published fires BEFORE willSet, so reading the property in the sink
         // would still see the old value. Use the new value from the publisher.
@@ -338,6 +342,11 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
             .dropFirst()
             .sink { [weak self] new in self?.applyColorPickerShortcut(new) }
             .store(in: &shortcutCancellables)
+
+        ShortcutStore.shared.$fullscreenShortcut
+            .dropFirst()
+            .sink { [weak self] new in self?.applyFullscreenShortcut(new) }
+            .store(in: &shortcutCancellables)
     }
 
     private func applyCaptureShortcut(_ s: Shortcut) {
@@ -349,6 +358,12 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
     private func applyColorPickerShortcut(_ s: Shortcut) {
         colorPickerHotKeyManager.register(keyCode: s.keyCode, modifiers: s.modifiers) { [weak self] in
             self?.pickColor()
+        }
+    }
+
+    private func applyFullscreenShortcut(_ s: Shortcut) {
+        fullscreenHotKeyManager.register(keyCode: s.keyCode, modifiers: s.modifiers) { [weak self] in
+            self?.captureFullscreen()
         }
     }
 

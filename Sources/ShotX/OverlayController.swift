@@ -36,24 +36,40 @@ final class OverlayController {
         NSCursor.crosshair.push()
         cursorPushed = true
 
-        // WindowServer tracks the cursor based on the last mouse event, which
-        // was in whatever app the user was in when they pressed the shortcut.
-        // Without a real mouse event it keeps showing the previous cursor.
-        // Synthesize a mouse-moved event at the current location — zero visible
-        // movement, but it forces WindowServer to re-evaluate cursor tracking.
+        // Set the cursor explicitly too; push() sets current on the stack but
+        // WindowServer tracks separately based on the last real mouse event.
+        NSCursor.crosshair.set()
+
+        // Without a real mouse event WindowServer keeps showing whatever
+        // cursor the previous app had. Force re-evaluation via two stacked
+        // mechanisms since neither is 100% reliable on its own.
         DispatchQueue.main.async {
             NSCursor.crosshair.set()
             guard let primary = NSScreen.screens.first else { return }
             let mouseLoc = NSEvent.mouseLocation
-            let cgPoint = CGPoint(x: mouseLoc.x, y: primary.frame.height - mouseLoc.y)
+            let cgY = primary.frame.height - mouseLoc.y
+            let cgPoint = CGPoint(x: mouseLoc.x, y: cgY)
+
+            // 1) Synthesize a mouse-moved event at the session tap. Session-
+            //    level doesn't require Accessibility permission the way
+            //    cghidEventTap does, so this actually fires for ad-hoc users.
             if let event = CGEvent(
                 mouseEventSource: nil,
                 mouseType: .mouseMoved,
                 mouseCursorPosition: cgPoint,
                 mouseButton: .left
             ) {
-                event.post(tap: .cghidEventTap)
+                event.post(tap: .cgSessionEventTap)
             }
+
+            // 2) Warp the cursor 1px away and back. The tiny jitter is barely
+            //    perceptible and guarantees WindowServer re-evaluates cursor.
+            let jitter = CGPoint(x: mouseLoc.x + 1, y: cgY)
+            CGWarpMouseCursorPosition(jitter)
+            CGWarpMouseCursorPosition(cgPoint)
+            CGAssociateMouseAndMouseCursorPosition(1)
+
+            NSCursor.crosshair.set()
         }
     }
 

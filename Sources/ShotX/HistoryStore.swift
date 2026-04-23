@@ -1,5 +1,7 @@
 import Cocoa
 import Combine
+import AVFoundation
+import ImageIO
 
 struct CaptureEntry: Identifiable, Codable, Equatable {
     enum Kind: String, Codable {
@@ -53,6 +55,14 @@ final class HistoryStore: ObservableObject {
     private let maxEntries = 100
     private let historyDir: URL
     private let indexURL: URL
+
+    /// In-memory cache of downsampled thumbnails, keyed by entry ID. Auto-evicts
+    /// on memory pressure via NSCache's built-in behaviour.
+    private let thumbnailCache: NSCache<NSString, NSImage> = {
+        let c = NSCache<NSString, NSImage>()
+        c.countLimit = 200
+        return c
+    }()
 
     init() {
         let appSupport = FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask).first!
@@ -158,8 +168,67 @@ final class HistoryStore: ObservableObject {
         }
     }
 
+    /// Returns a small, decoded, cached thumbnail suitable for the history grid.
+    /// Decodes on a background queue; first call per entry hits disk, subsequent
+    /// calls return from the in-memory cache. `@MainActor` so NSImage? doesn't
+    /// have to cross an actor boundary when returned to the SwiftUI caller.
+    @MainActor
+    func thumbnail(for entry: CaptureEntry, maxDim: CGFloat = 300) async -> NSImage? {
+        let key = entry.id.uuidString as NSString
+        if let cached = thumbnailCache.object(forKey: key) {
+            return cached
+        }
+
+        let url = fileURL(for: entry)
+        let kind = entry.kind
+
+        let image: NSImage? = await withCheckedContinuation { continuation in
+            DispatchQueue.global(qos: .userInitiated).async {
+                let img: NSImage?
+                switch kind {
+                case .image, .gif:
+                    img = HistoryStore.downsampledImage(at: url, maxDim: maxDim)
+                case .video:
+                    img = HistoryStore.downsampledVideoFrame(at: url, maxDim: maxDim)
+                }
+                continuation.resume(returning: img)
+            }
+        }
+
+        if let image = image {
+            thumbnailCache.setObject(image, forKey: key)
+        }
+        return image
+    }
+
+    private static func downsampledImage(at url: URL, maxDim: CGFloat) -> NSImage? {
+        guard let src = CGImageSourceCreateWithURL(url as CFURL, nil) else { return nil }
+        let opts: [CFString: Any] = [
+            kCGImageSourceCreateThumbnailFromImageAlways: true,
+            kCGImageSourceThumbnailMaxPixelSize: maxDim * 2, // 2x for Retina
+            kCGImageSourceShouldCacheImmediately: true
+        ]
+        guard let cg = CGImageSourceCreateThumbnailAtIndex(src, 0, opts as CFDictionary) else { return nil }
+        let pointSize = NSSize(width: CGFloat(cg.width) / 2, height: CGFloat(cg.height) / 2)
+        return NSImage(cgImage: cg, size: pointSize)
+    }
+
+    private static func downsampledVideoFrame(at url: URL, maxDim: CGFloat) -> NSImage? {
+        let asset = AVURLAsset(url: url)
+        let gen = AVAssetImageGenerator(asset: asset)
+        gen.appliesPreferredTrackTransform = true
+        gen.maximumSize = CGSize(width: maxDim * 2, height: maxDim * 2)
+        gen.requestedTimeToleranceBefore = .zero
+        gen.requestedTimeToleranceAfter = .zero
+        let time = CMTime(seconds: 0.1, preferredTimescale: 600)
+        guard let cg = try? gen.copyCGImage(at: time, actualTime: nil) else { return nil }
+        let pointSize = NSSize(width: CGFloat(cg.width) / 2, height: CGFloat(cg.height) / 2)
+        return NSImage(cgImage: cg, size: pointSize)
+    }
+
     func remove(_ entry: CaptureEntry) {
         try? FileManager.default.removeItem(at: fileURL(for: entry))
+        thumbnailCache.removeObject(forKey: entry.id.uuidString as NSString)
         entries.removeAll { $0.id == entry.id }
         save()
     }
@@ -168,6 +237,7 @@ final class HistoryStore: ObservableObject {
         for e in entries {
             try? FileManager.default.removeItem(at: fileURL(for: e))
         }
+        thumbnailCache.removeAllObjects()
         entries.removeAll()
         save()
     }

@@ -34,6 +34,16 @@ final class SelectionView: NSView {
         NSCursor.crosshair.set()
     }
 
+    override func viewDidMoveToWindow() {
+        super.viewDidMoveToWindow()
+        // macOS doesn't fire a mouseEntered when the tracking area is first
+        // installed with the mouse already inside it, so set the cursor
+        // directly on mount.
+        if window != nil {
+            NSCursor.crosshair.set()
+        }
+    }
+
     override func mouseDown(with event: NSEvent) {
         startPoint = convert(event.locationInWindow, from: nil)
         currentRect = .zero

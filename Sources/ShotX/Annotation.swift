@@ -166,6 +166,7 @@ enum AnnotationRenderer {
 final class AnnotationState: ObservableObject {
     @Published var tool: AnnotationTool = .arrow
     @Published var colorIndex: Int = 0
+    @Published var zoom: CGFloat = 1.0
 
     static let palette: [NSColor] = [
         .systemRed, NSColor(srgbRed: 1.0, green: 0.5, blue: 0.1, alpha: 1),
@@ -565,12 +566,16 @@ struct AnnotationToolbar: View {
     let onCancel: () -> Void
     let onSave: () -> Void
     let onCopy: () -> Void
+    let onZoomIn: () -> Void
+    let onZoomOut: () -> Void
+    let onZoomReset: () -> Void
 
     var body: some View {
         HStack(spacing: 14) {
             toolGroup
             colorGroup
             Spacer(minLength: 8)
+            zoomGroup
             undoButton
             verticalDivider
             Button("Cancel", action: onCancel)
@@ -663,6 +668,49 @@ struct AnnotationToolbar: View {
         .keyboardShortcut("z", modifiers: .command)
         .help("Undo (⌘Z)")
         .fixedSize()
+    }
+
+    private var zoomGroup: some View {
+        HStack(spacing: 2) {
+            ZoomButton(icon: "minus", action: onZoomOut)
+                .keyboardShortcut("-", modifiers: .command)
+            Button(action: onZoomReset) {
+                Text("\(Int((state.zoom * 100).rounded()))%")
+                    .font(.system(size: 11, weight: .semibold, design: .rounded))
+                    .monospacedDigit()
+                    .foregroundStyle(.primary)
+                    .frame(width: 42, height: 26)
+            }
+            .buttonStyle(.plain)
+            .help("Reset to fit")
+            ZoomButton(icon: "plus", action: onZoomIn)
+                .keyboardShortcut("=", modifiers: .command)
+        }
+        .padding(4)
+        .background(GroupCapsuleBackground())
+        .fixedSize()
+    }
+}
+
+private struct ZoomButton: View {
+    let icon: String
+    let action: () -> Void
+    @State private var hovering = false
+
+    var body: some View {
+        Button(action: action) {
+            Image(systemName: icon)
+                .font(.system(size: 11, weight: .bold))
+                .frame(width: 24, height: 26)
+                .foregroundStyle(hovering ? Color.primary : Color.primary.opacity(0.8))
+                .background(
+                    RoundedRectangle(cornerRadius: 6)
+                        .fill(hovering ? Color.primary.opacity(0.12) : .clear)
+                )
+        }
+        .buttonStyle(.plain)
+        .onHover { hovering = $0 }
+        .animation(.easeOut(duration: 0.1), value: hovering)
     }
 }
 
@@ -862,10 +910,12 @@ final class CenteringClipView: NSClipView {
 final class AnnotationWindowController: NSObject, NSWindowDelegate {
     private var window: NSWindow?
     private var canvas: AnnotationCanvas?
+    private var scrollView: NSScrollView?
     private var onClose: (() -> Void)?
 
     private let state = AnnotationState()
     private var cancellables = Set<AnyCancellable>()
+    private var magnificationObservation: NSKeyValueObservation?
 
     func open(image: NSImage, onClose: @escaping () -> Void) {
         self.onClose = onClose
@@ -893,6 +943,11 @@ final class AnnotationWindowController: NSObject, NSWindowDelegate {
         scroll.drawsBackground = true
         scroll.backgroundColor = NSColor(white: 0.11, alpha: 1)
 
+        // Enable zoom: pinch on trackpad to zoom, or Cmd+scroll.
+        scroll.allowsMagnification = true
+        scroll.minMagnification = 0.1
+        scroll.maxMagnification = 5.0
+
         let centering = CenteringClipView(frame: scroll.contentView.bounds)
         centering.drawsBackground = true
         centering.backgroundColor = NSColor(white: 0.11, alpha: 1)
@@ -900,13 +955,17 @@ final class AnnotationWindowController: NSObject, NSWindowDelegate {
 
         scroll.documentView = canvas
         scroll.translatesAutoresizingMaskIntoConstraints = false
+        scrollView = scroll
 
         let toolbarView = AnnotationToolbar(
             state: state,
             onUndo: { [weak self] in self?.canvas?.undo() },
             onCancel: { [weak self] in self?.window?.close() },
             onSave: { [weak self] in self?.saveToDesktop() },
-            onCopy: { [weak self] in self?.copyToClipboard() }
+            onCopy: { [weak self] in self?.copyToClipboard() },
+            onZoomIn: { [weak self] in self?.zoomIn() },
+            onZoomOut: { [weak self] in self?.zoomOut() },
+            onZoomReset: { [weak self] in self?.fitImageToWindow() }
         )
         let hosting = NSHostingView(rootView: toolbarView)
         hosting.translatesAutoresizingMaskIntoConstraints = false
@@ -945,6 +1004,49 @@ final class AnnotationWindowController: NSObject, NSWindowDelegate {
         window.makeKeyAndOrderFront(nil)
         NSApp.activate(ignoringOtherApps: true)
         self.window = window
+
+        // Fit image to available space on open so the user doesn't need to scroll.
+        DispatchQueue.main.async { [weak self] in
+            self?.fitImageToWindow()
+        }
+
+        // Mirror NSScrollView.magnification into state.zoom so pinch-to-zoom
+        // updates the toolbar percentage.
+        magnificationObservation = scroll.observe(\.magnification, options: [.new]) { [weak self] scroll, _ in
+            let mag = scroll.magnification
+            DispatchQueue.main.async {
+                self?.state.zoom = mag
+            }
+        }
+    }
+
+    private func fitImageToWindow() {
+        guard let scroll = scrollView,
+              let imageSize = canvas?.image?.size,
+              imageSize.width > 0, imageSize.height > 0
+        else { return }
+        let content = scroll.contentSize
+        guard content.width > 0, content.height > 0 else { return }
+        let fitW = content.width / imageSize.width
+        let fitH = content.height / imageSize.height
+        // 5% breathing room, never upscale beyond 1:1 by default.
+        let target = min(1.0, min(fitW, fitH) * 0.95)
+        scroll.animator().magnification = target
+        state.zoom = target
+    }
+
+    private func zoomIn() {
+        guard let scroll = scrollView else { return }
+        let newMag = min(scroll.maxMagnification, scroll.magnification * 1.25)
+        scroll.animator().magnification = newMag
+        state.zoom = newMag
+    }
+
+    private func zoomOut() {
+        guard let scroll = scrollView else { return }
+        let newMag = max(scroll.minMagnification, scroll.magnification / 1.25)
+        scroll.animator().magnification = newMag
+        state.zoom = newMag
     }
 
     private func saveToDesktop() {
