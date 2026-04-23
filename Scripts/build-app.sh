@@ -7,7 +7,9 @@ cd "$(dirname "$0")/.."
 APP_NAME="ShotX"
 BUNDLE_ID="com.shotx.app"
 VERSION="${VERSION:-1.0}"
-BUILD_NUMBER="${BUILD_NUMBER:-1}"
+# Build number must match what's in appcast.xml for Sparkle to compare correctly.
+# Default it to VERSION so they always align.
+BUILD_NUMBER="${BUILD_NUMBER:-$VERSION}"
 
 DIST="dist"
 APP="$DIST/$APP_NAME.app"
