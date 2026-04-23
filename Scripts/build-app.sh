@@ -17,8 +17,8 @@ CONTENTS="$APP/Contents"
 MACOS="$CONTENTS/MacOS"
 RESOURCES="$CONTENTS/Resources"
 
-echo "→ Building release binary…"
-swift build -c release
+echo "→ Building release binary (universal: arm64 + x86_64)…"
+swift build -c release --arch arm64 --arch x86_64
 
 # Sparkle public key (used for verifying update signatures)
 SU_PUBLIC_KEY=""
@@ -35,7 +35,29 @@ fi
 echo "→ Assembling app bundle at $APP"
 rm -rf "$APP"
 mkdir -p "$MACOS" "$RESOURCES"
-cp ".build/release/$APP_NAME" "$MACOS/$APP_NAME"
+
+# Locate the multi-arch binary. SPM places multi-arch output under
+# .build/apple/Products/Release; single-arch builds go to .build/release.
+BINARY_SRC=""
+for candidate in \
+    ".build/apple/Products/Release/$APP_NAME" \
+    ".build/release/$APP_NAME"; do
+    if [ -f "$candidate" ]; then
+        BINARY_SRC="$candidate"
+        break
+    fi
+done
+if [ -z "$BINARY_SRC" ]; then
+    echo "✗ Built binary not found; expected at .build/apple/Products/Release/$APP_NAME"
+    exit 1
+fi
+cp "$BINARY_SRC" "$MACOS/$APP_NAME"
+echo "  ✓ Binary: $BINARY_SRC"
+if command -v lipo >/dev/null 2>&1; then
+    ARCHS=$(lipo -archs "$MACOS/$APP_NAME" 2>/dev/null || echo "?")
+    echo "    architectures: $ARCHS"
+fi
+
 cp "Resources/AppIcon.icns" "$RESOURCES/AppIcon.icns"
 
 # Embed Sparkle.framework — without this, the app launches but Sparkle won't function.
