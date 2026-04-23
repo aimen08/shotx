@@ -593,9 +593,10 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
             ]) { _, new in new }
         ))
 
+        // applicationName + applicationVersion auto-populate from the bundle's
+        // Info.plist (CFBundleName / CFBundleShortVersionString), which is set
+        // per-release by Scripts/build-app.sh.
         NSApp.orderFrontStandardAboutPanel(options: [
-            .applicationName: "ShotX",
-            .applicationVersion: "1.0",
             .credits: credits
         ])
     }
