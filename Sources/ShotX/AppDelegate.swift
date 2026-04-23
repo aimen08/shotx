@@ -6,6 +6,7 @@ import UniformTypeIdentifiers
 final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
     private var statusItem: NSStatusItem!
     private var hotKeyManager: HotKeyManager!
+    private var colorPickerHotKeyManager: HotKeyManager!
     private var overlayController: OverlayController?
     private var popupController: PostCapturePopupController?
     private var annotationController: AnnotationWindowController?
@@ -14,7 +15,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
     private var timerFrameOverlay: RecordingFrameOverlay?
     private var windowCaptureController: WindowCaptureController?
     private var permissionController: PermissionPromptController?
-    private var shortcutCancellable: AnyCancellable?
+    private var shortcutCancellables = Set<AnyCancellable>()
 
     func applicationDidFinishLaunching(_ notification: Notification) {
         setupStatusBar()
@@ -146,7 +147,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
             title: "Capture Area",
             symbol: "rectangle.dashed",
             action: #selector(captureNow),
-            applyShortcut: true
+            shortcut: ShortcutStore.shared.shortcut
         ))
 
         let prev = menuItem(
@@ -214,6 +215,13 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
         )
         showDesktop.state = DesktopIcons.isVisible() ? .on : .off
         menu.addItem(showDesktop)
+
+        menu.addItem(menuItem(
+            title: "Pick Color…",
+            symbol: "eyedropper",
+            action: #selector(pickColor),
+            shortcut: ShortcutStore.shared.colorPickerShortcut
+        ))
 
         menu.addItem(menuItem(
             title: "Open…",
@@ -294,7 +302,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
         action: Selector,
         keyEquivalent: String = "",
         keyEquivalentModifiers: NSEvent.ModifierFlags = [],
-        applyShortcut: Bool = false
+        shortcut: Shortcut? = nil
     ) -> NSMenuItem {
         let item = NSMenuItem(title: title, action: action, keyEquivalent: keyEquivalent)
         item.keyEquivalentModifierMask = keyEquivalentModifiers
@@ -302,12 +310,10 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
         if let symbol = symbol {
             item.image = NSImage(systemSymbolName: symbol, accessibilityDescription: nil)
         }
-        if applyShortcut {
-            let s = ShortcutStore.shared.shortcut
-            if let ke = ShortcutFormatter.menuKeyEquivalent(for: s.keyCode) {
-                item.keyEquivalent = ke
-                item.keyEquivalentModifierMask = ShortcutFormatter.nsModifierFlags(from: s.modifiers)
-            }
+        if let s = shortcut,
+           let ke = ShortcutFormatter.menuKeyEquivalent(for: s.keyCode) {
+            item.keyEquivalent = ke
+            item.keyEquivalentModifierMask = ShortcutFormatter.nsModifierFlags(from: s.modifiers)
         }
         return item
     }
@@ -316,19 +322,33 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
 
     private func setupHotKey() {
         hotKeyManager = HotKeyManager()
-        apply(shortcut: ShortcutStore.shared.shortcut)
-        // @Published fires BEFORE willSet, so reading the property here would still
-        // see the old value. Use the new value from the publisher's output instead.
-        shortcutCancellable = ShortcutStore.shared.$shortcut
+        colorPickerHotKeyManager = HotKeyManager()
+
+        applyCaptureShortcut(ShortcutStore.shared.shortcut)
+        applyColorPickerShortcut(ShortcutStore.shared.colorPickerShortcut)
+
+        // @Published fires BEFORE willSet, so reading the property in the sink
+        // would still see the old value. Use the new value from the publisher.
+        ShortcutStore.shared.$shortcut
             .dropFirst()
-            .sink { [weak self] newShortcut in
-                self?.apply(shortcut: newShortcut)
-            }
+            .sink { [weak self] new in self?.applyCaptureShortcut(new) }
+            .store(in: &shortcutCancellables)
+
+        ShortcutStore.shared.$colorPickerShortcut
+            .dropFirst()
+            .sink { [weak self] new in self?.applyColorPickerShortcut(new) }
+            .store(in: &shortcutCancellables)
     }
 
-    private func apply(shortcut: Shortcut) {
-        hotKeyManager.register(keyCode: shortcut.keyCode, modifiers: shortcut.modifiers) { [weak self] in
+    private func applyCaptureShortcut(_ s: Shortcut) {
+        hotKeyManager.register(keyCode: s.keyCode, modifiers: s.modifiers) { [weak self] in
             self?.captureNow()
+        }
+    }
+
+    private func applyColorPickerShortcut(_ s: Shortcut) {
+        colorPickerHotKeyManager.register(keyCode: s.keyCode, modifiers: s.modifiers) { [weak self] in
+            self?.pickColor()
         }
     }
 
@@ -453,6 +473,10 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
 
     @objc private func toggleDesktopIcons() {
         DesktopIcons.toggle()
+    }
+
+    @objc private func pickColor() {
+        MainActor.assumeIsolated { ColorPicker.pick() }
     }
 
     @objc private func recordScreen() {

@@ -389,10 +389,10 @@ struct SettingsView: View {
                 SettingsCard(
                     icon: "command",
                     tint: .blue,
-                    title: "Shortcut",
-                    subtitle: "Trigger region capture with a key combination"
+                    title: "Shortcuts",
+                    subtitle: "Customize global hotkeys"
                 ) {
-                    VStack(alignment: .leading, spacing: 10) {
+                    VStack(alignment: .leading, spacing: 12) {
                         HStack {
                             Text("Capture region")
                                 .font(.system(size: 13))
@@ -400,6 +400,20 @@ struct SettingsView: View {
                             ShortcutRecorder(shortcut: $shortcuts.shortcut)
                                 .frame(width: 150, height: 28)
                             Button("Reset") { shortcuts.shortcut = .default }
+                                .buttonStyle(.borderless)
+                                .foregroundStyle(.secondary)
+                                .font(.system(size: 12))
+                        }
+                        Rectangle()
+                            .fill(Color.primary.opacity(0.08))
+                            .frame(height: 0.5)
+                        HStack {
+                            Text("Pick color")
+                                .font(.system(size: 13))
+                            Spacer()
+                            ShortcutRecorder(shortcut: $shortcuts.colorPickerShortcut)
+                                .frame(width: 150, height: 28)
+                            Button("Reset") { shortcuts.colorPickerShortcut = .defaultColorPicker }
                                 .buttonStyle(.borderless)
                                 .foregroundStyle(.secondary)
                                 .font(.system(size: 12))

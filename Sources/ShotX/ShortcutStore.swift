@@ -10,27 +10,41 @@ struct Shortcut: Codable, Equatable {
         keyCode: UInt32(kVK_ANSI_X),
         modifiers: UInt32(optionKey)
     )
+
+    static let defaultColorPicker = Shortcut(
+        keyCode: UInt32(kVK_ANSI_C),
+        modifiers: UInt32(optionKey | shiftKey)
+    )
 }
 
 final class ShortcutStore: ObservableObject {
     static let shared = ShortcutStore()
 
     @Published var shortcut: Shortcut {
-        didSet { persist() }
+        didSet { Self.persist(shortcut, key: captureKey) }
     }
 
-    private let key = "com.shotx.shortcut"
+    @Published var colorPickerShortcut: Shortcut {
+        didSet { Self.persist(colorPickerShortcut, key: colorPickerKey) }
+    }
+
+    private let captureKey = "com.shotx.shortcut"
+    private let colorPickerKey = "com.shotx.colorPickerShortcut"
 
     init() {
-        if let data = UserDefaults.standard.data(forKey: key),
-           let decoded = try? JSONDecoder().decode(Shortcut.self, from: data) {
-            shortcut = decoded
-        } else {
-            shortcut = .default
-        }
+        shortcut = Self.load(key: "com.shotx.shortcut") ?? .default
+        colorPickerShortcut = Self.load(key: "com.shotx.colorPickerShortcut") ?? .defaultColorPicker
     }
 
-    private func persist() {
+    private static func load(key: String) -> Shortcut? {
+        guard let data = UserDefaults.standard.data(forKey: key),
+              let decoded = try? JSONDecoder().decode(Shortcut.self, from: data) else {
+            return nil
+        }
+        return decoded
+    }
+
+    private static func persist(_ shortcut: Shortcut, key: String) {
         guard let data = try? JSONEncoder().encode(shortcut) else { return }
         UserDefaults.standard.set(data, forKey: key)
     }

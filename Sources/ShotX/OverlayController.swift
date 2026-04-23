@@ -35,6 +35,26 @@ final class OverlayController {
         // shows immediately on every screen without requiring a click.
         NSCursor.crosshair.push()
         cursorPushed = true
+
+        // WindowServer tracks the cursor based on the last mouse event, which
+        // was in whatever app the user was in when they pressed the shortcut.
+        // Without a real mouse event it keeps showing the previous cursor.
+        // Synthesize a mouse-moved event at the current location — zero visible
+        // movement, but it forces WindowServer to re-evaluate cursor tracking.
+        DispatchQueue.main.async {
+            NSCursor.crosshair.set()
+            guard let primary = NSScreen.screens.first else { return }
+            let mouseLoc = NSEvent.mouseLocation
+            let cgPoint = CGPoint(x: mouseLoc.x, y: primary.frame.height - mouseLoc.y)
+            if let event = CGEvent(
+                mouseEventSource: nil,
+                mouseType: .mouseMoved,
+                mouseCursorPosition: cgPoint,
+                mouseButton: .left
+            ) {
+                event.post(tap: .cghidEventTap)
+            }
+        }
     }
 
     private func finish(with rectInScreen: CGRect?, screen: NSScreen?) {

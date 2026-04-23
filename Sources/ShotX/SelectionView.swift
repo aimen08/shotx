@@ -6,13 +6,32 @@ final class SelectionView: NSView {
 
     private var startPoint: NSPoint?
     private var currentRect: NSRect = .zero
+    private var trackingArea: NSTrackingArea?
 
     override var acceptsFirstResponder: Bool { true }
     override var isFlipped: Bool { false }
 
-    override func resetCursorRects() {
-        discardCursorRects()
-        addCursorRect(bounds, cursor: .crosshair)
+    override func updateTrackingAreas() {
+        super.updateTrackingAreas()
+        if let t = trackingArea { removeTrackingArea(t) }
+        // .activeAlways + .cursorUpdate so the crosshair is applied regardless
+        // of key-window state, which can be flaky for .accessory apps.
+        let t = NSTrackingArea(
+            rect: bounds,
+            options: [.activeAlways, .inVisibleRect, .mouseMoved, .cursorUpdate],
+            owner: self,
+            userInfo: nil
+        )
+        addTrackingArea(t)
+        trackingArea = t
+    }
+
+    override func cursorUpdate(with event: NSEvent) {
+        NSCursor.crosshair.set()
+    }
+
+    override func mouseMoved(with event: NSEvent) {
+        NSCursor.crosshair.set()
     }
 
     override func mouseDown(with event: NSEvent) {

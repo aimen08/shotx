@@ -7,6 +7,15 @@
         <language>en</language>
 
         <item>
+            <title>Version 1.8</title>
+            <pubDate>Thu, 23 Apr 2026 13:22:10 +0000</pubDate>
+            <sparkle:version>1.8</sparkle:version>
+            <sparkle:shortVersionString>1.8</sparkle:shortVersionString>
+            <sparkle:minimumSystemVersion>13.0</sparkle:minimumSystemVersion>
+            <enclosure url="https://github.com/aimen08/shotx/releases/download/v1.8/ShotX-1.8.dmg" length="1622420" type="application/octet-stream" sparkle:edSignature="aH6o4fNq5ATG/YiB9WNr+LFQS7KG12XdTu3pe4g1b2xeOwPJl6YYiMEQTjs8wH+dc7A/lMwQpv2J6RWckoZMAg==" />
+        </item>
+
+        <item>
             <title>Version 1.7</title>
             <pubDate>Thu, 23 Apr 2026 02:26:24 +0000</pubDate>
             <sparkle:version>1.7</sparkle:version>

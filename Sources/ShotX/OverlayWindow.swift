@@ -26,6 +26,7 @@ final class OverlayWindow: NSWindow {
         level = .screenSaver
         ignoresMouseEvents = false
         isMovable = false
+        acceptsMouseMovedEvents = true
         collectionBehavior = [.canJoinAllSpaces, .fullScreenAuxiliary, .stationary]
 
         selectionView.onSelect = { [weak self] rectInView in
