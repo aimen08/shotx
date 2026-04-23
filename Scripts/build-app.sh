@@ -56,6 +56,9 @@ for src in "${SPARKLE_FRAMEWORK_CANDIDATES[@]}"; do
         mkdir -p "$FRAMEWORKS"
         cp -R "$src" "$FRAMEWORKS/"
         echo "  ✓ Embedded Sparkle.framework from $src"
+        # Tell the binary to look for frameworks in Contents/Frameworks.
+        # SPM's release binary doesn't bake this rpath in by default.
+        install_name_tool -add_rpath "@executable_path/../Frameworks" "$MACOS/$APP_NAME" 2>/dev/null || true
         break
     fi
 done
