@@ -5,6 +5,6 @@ Packages/
 *.xcodeproj
 xcuserdata/
 DerivedData/
-Package.resolved
 dist/
 Resources/AppIcon.iconset/
+.sparkle-tools/

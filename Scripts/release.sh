@@ -75,12 +75,29 @@ if [ ! -f "$DMG_PATH" ]; then
     exit 1
 fi
 
+# --- Sparkle: sign the DMG and update appcast.xml
+if [ -f ".sparkle-tools/bin/sign_update" ] && [ -f ".sparkle-public-key" ]; then
+    echo "→ Signing DMG with Sparkle"
+    SIGN_OUTPUT=$(.sparkle-tools/bin/sign_update "$DMG_PATH")
+    SIGNATURE=$(echo "$SIGN_OUTPUT" | sed -n 's/.*sparkle:edSignature="\([^"]*\)".*/\1/p')
+    if [ -z "$SIGNATURE" ]; then
+        echo "✗ sign_update returned no signature"
+        exit 1
+    fi
+    DMG_LENGTH=$(stat -f %z "$DMG_PATH")
+    DMG_URL="https://github.com/aimen08/shotx/releases/download/${TAG}/ShotX-${VERSION}.dmg"
+    echo "→ Updating appcast.xml"
+    Scripts/update-appcast.swift "$VERSION" "$DMG_URL" "$SIGNATURE" "$DMG_LENGTH"
+else
+    echo "→ Skipping Sparkle signing (run Scripts/sparkle-setup.sh to enable)"
+fi
+
 # --- Commit (only if there are changes)
 if [ -n "$(git status --porcelain)" ]; then
     echo "→ Committing changes…"
     git add -u
     # Pick up new files in commonly-tracked locations (skips dist/ via .gitignore).
-    for path in Sources Scripts Resources/AppIcon.icns README.md .gitignore Package.swift; do
+    for path in Sources Scripts Resources/AppIcon.icns README.md .gitignore Package.swift Package.resolved appcast.xml .sparkle-public-key; do
         if [ -e "$path" ]; then
             git add "$path"
         fi

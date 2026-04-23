@@ -20,6 +20,9 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
         setupStatusBar()
         setupHotKey()
 
+        // Boot Sparkle so periodic background update checks begin.
+        MainActor.assumeIsolated { _ = UpdaterController.shared }
+
         // Show the permissions prompt on launch if Screen Recording isn't granted.
         // Slight delay so the menu bar icon appears first and gives the user
         // visual context that the app launched.
@@ -257,6 +260,12 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
                 action: #selector(openPermissions)
             ))
         }
+
+        menu.addItem(menuItem(
+            title: "Check for Updates…",
+            symbol: "arrow.down.circle",
+            action: #selector(checkForUpdates)
+        ))
 
         menu.addItem(menuItem(
             title: "About ShotX",
@@ -555,6 +564,12 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
             mainWindowController = MainWindowController()
         }
         mainWindowController?.show(tab: .settings)
+    }
+
+    @objc private func checkForUpdates() {
+        MainActor.assumeIsolated {
+            UpdaterController.shared.checkForUpdates()
+        }
     }
 
     @objc private func showAbout() {

@@ -18,6 +18,13 @@ RESOURCES="$CONTENTS/Resources"
 echo "→ Building release binary…"
 swift build -c release
 
+# Sparkle public key (used for verifying update signatures)
+SU_PUBLIC_KEY=""
+if [ -f ".sparkle-public-key" ]; then
+    SU_PUBLIC_KEY=$(cat .sparkle-public-key)
+fi
+SU_FEED_URL="https://raw.githubusercontent.com/aimen08/shotx/main/appcast.xml"
+
 if [ ! -f "Resources/AppIcon.icns" ]; then
     echo "→ Generating app icon…"
     ./Scripts/make-icon.swift
@@ -28,6 +35,30 @@ rm -rf "$APP"
 mkdir -p "$MACOS" "$RESOURCES"
 cp ".build/release/$APP_NAME" "$MACOS/$APP_NAME"
 cp "Resources/AppIcon.icns" "$RESOURCES/AppIcon.icns"
+
+# Embed Sparkle.framework — without this, the app launches but Sparkle won't function.
+# Sparkle ships as an xcframework artifact via SPM; pick the one matching the host arch.
+ARCH=$(uname -m)
+SPARKLE_SLICE=""
+case "$ARCH" in
+    arm64) SPARKLE_SLICE="macos-arm64_x86_64" ;;
+    x86_64) SPARKLE_SLICE="macos-arm64_x86_64" ;;
+esac
+SPARKLE_FRAMEWORK_CANDIDATES=(
+    ".build/artifacts/sparkle/Sparkle/Sparkle.xcframework/$SPARKLE_SLICE/Sparkle.framework"
+    ".build/artifacts/Sparkle/Sparkle/Sparkle.xcframework/$SPARKLE_SLICE/Sparkle.framework"
+    ".build/release/Sparkle.framework"
+    ".build/arm64-apple-macosx/release/Sparkle.framework"
+)
+for src in "${SPARKLE_FRAMEWORK_CANDIDATES[@]}"; do
+    if [ -d "$src" ]; then
+        FRAMEWORKS="$CONTENTS/Frameworks"
+        mkdir -p "$FRAMEWORKS"
+        cp -R "$src" "$FRAMEWORKS/"
+        echo "  ✓ Embedded Sparkle.framework from $src"
+        break
+    fi
+done
 
 cat > "$CONTENTS/Info.plist" <<EOF
 <?xml version="1.0" encoding="UTF-8"?>
@@ -62,6 +93,14 @@ cat > "$CONTENTS/Info.plist" <<EOF
     <string>ShotX needs to capture your screen to take screenshots and recordings.</string>
     <key>NSAppleEventsUsageDescription</key>
     <string>ShotX uses Apple Events to control Finder for the desktop-icons toggle.</string>
+    <key>SUFeedURL</key>
+    <string>$SU_FEED_URL</string>
+    <key>SUPublicEDKey</key>
+    <string>$SU_PUBLIC_KEY</string>
+    <key>SUEnableAutomaticChecks</key>
+    <true/>
+    <key>SUScheduledCheckInterval</key>
+    <integer>86400</integer>
 </dict>
 </plist>
 EOF
