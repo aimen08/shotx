@@ -6,6 +6,7 @@ final class SelectionView: NSView {
 
     private var startPoint: NSPoint?
     private var currentRect: NSRect = .zero
+    private var mousePosition: NSPoint?
     private var trackingArea: NSTrackingArea?
 
     override var acceptsFirstResponder: Bool { true }
@@ -14,11 +15,9 @@ final class SelectionView: NSView {
     override func updateTrackingAreas() {
         super.updateTrackingAreas()
         if let t = trackingArea { removeTrackingArea(t) }
-        // .activeAlways + .cursorUpdate so the crosshair is applied regardless
-        // of key-window state, which can be flaky for .accessory apps.
         let t = NSTrackingArea(
             rect: bounds,
-            options: [.activeAlways, .inVisibleRect, .mouseMoved, .cursorUpdate],
+            options: [.activeAlways, .inVisibleRect, .mouseMoved, .mouseEnteredAndExited],
             owner: self,
             userInfo: nil
         )
@@ -26,26 +25,37 @@ final class SelectionView: NSView {
         trackingArea = t
     }
 
-    override func cursorUpdate(with event: NSEvent) {
-        NSCursor.crosshair.set()
-    }
-
-    override func mouseMoved(with event: NSEvent) {
-        NSCursor.crosshair.set()
-    }
-
     override func viewDidMoveToWindow() {
         super.viewDidMoveToWindow()
-        // macOS doesn't fire a mouseEntered when the tracking area is first
-        // installed with the mouse already inside it, so set the cursor
-        // directly on mount.
-        if window != nil {
-            NSCursor.crosshair.set()
-        }
+        guard let win = window else { return }
+        // Seed the mouse position from the current cursor location so the
+        // crosshair is visible on the very first frame, before any mouseMoved.
+        let global = NSEvent.mouseLocation
+        mousePosition = NSPoint(
+            x: global.x - win.frame.origin.x,
+            y: global.y - win.frame.origin.y
+        )
+        needsDisplay = true
     }
 
+    // MARK: - Mouse tracking (for crosshair position)
+
+    override func mouseMoved(with event: NSEvent) {
+        mousePosition = convert(event.locationInWindow, from: nil)
+        needsDisplay = true
+    }
+
+    override func mouseEntered(with event: NSEvent) {
+        mousePosition = convert(event.locationInWindow, from: nil)
+        needsDisplay = true
+    }
+
+    // MARK: - Selection
+
     override func mouseDown(with event: NSEvent) {
-        startPoint = convert(event.locationInWindow, from: nil)
+        let p = convert(event.locationInWindow, from: nil)
+        startPoint = p
+        mousePosition = p
         currentRect = .zero
         needsDisplay = true
     }
@@ -53,6 +63,7 @@ final class SelectionView: NSView {
     override func mouseDragged(with event: NSEvent) {
         guard let start = startPoint else { return }
         let p = convert(event.locationInWindow, from: nil)
+        mousePosition = p
         currentRect = NSRect(
             x: min(start.x, p.x),
             y: min(start.y, p.y),
@@ -83,48 +94,94 @@ final class SelectionView: NSView {
         }
     }
 
+    // MARK: - Drawing
+
     override func draw(_ dirtyRect: NSRect) {
-        // Dim the whole screen.
+        // Dim the whole screen
         NSColor.black.withAlphaComponent(0.35).setFill()
         bounds.fill()
 
-        guard currentRect.width > 0 && currentRect.height > 0 else { return }
+        // Punch out the selection area so the live screen shows through
+        if currentRect.width > 0, currentRect.height > 0 {
+            NSColor.clear.setFill()
+            currentRect.fill(using: .copy)
 
-        // Punch a clear hole for the selection.
-        NSColor.clear.setFill()
-        currentRect.fill(using: .copy)
+            // White border around the selection
+            NSColor.white.setStroke()
+            let border = NSBezierPath(rect: currentRect.insetBy(dx: 0.5, dy: 0.5))
+            border.lineWidth = 1
+            border.stroke()
 
-        // Selection border.
+            drawDimensions(for: currentRect)
+        }
+
+        // Draw our own crosshair cursor wherever the mouse is
+        if let pos = mousePosition {
+            drawCrosshair(at: pos)
+        }
+    }
+
+    private func drawCrosshair(at p: NSPoint) {
+        // Two thin white lines meeting at the cursor, with a small gap at
+        // the centre so the tip is clearly visible. Soft shadow for contrast
+        // against any background.
+        let arm: CGFloat = 11
+        let gap: CGFloat = 3
+        let lineWidth: CGFloat = 1
+
+        NSGraphicsContext.saveGraphicsState()
+        let shadow = NSShadow()
+        shadow.shadowColor = NSColor.black.withAlphaComponent(0.55)
+        shadow.shadowBlurRadius = 2
+        shadow.shadowOffset = .zero
+        shadow.set()
+
         NSColor.white.setStroke()
-        let path = NSBezierPath(rect: currentRect.insetBy(dx: 0.5, dy: 0.5))
-        path.lineWidth = 1
-        path.stroke()
+        let path = NSBezierPath()
+        path.lineWidth = lineWidth
 
-        // Dimensions label.
-        let label = "\(Int(currentRect.width)) × \(Int(currentRect.height))"
+        // Up
+        path.move(to: NSPoint(x: p.x, y: p.y + gap))
+        path.line(to: NSPoint(x: p.x, y: p.y + arm))
+        // Down
+        path.move(to: NSPoint(x: p.x, y: p.y - gap))
+        path.line(to: NSPoint(x: p.x, y: p.y - arm))
+        // Left
+        path.move(to: NSPoint(x: p.x - gap, y: p.y))
+        path.line(to: NSPoint(x: p.x - arm, y: p.y))
+        // Right
+        path.move(to: NSPoint(x: p.x + gap, y: p.y))
+        path.line(to: NSPoint(x: p.x + arm, y: p.y))
+
+        path.stroke()
+        NSGraphicsContext.restoreGraphicsState()
+    }
+
+    private func drawDimensions(for rect: NSRect) {
+        let label = "\(Int(rect.width)) × \(Int(rect.height))"
         let attrs: [NSAttributedString.Key: Any] = [
             .font: NSFont.systemFont(ofSize: 11, weight: .medium),
             .foregroundColor: NSColor.white
         ]
         let size = label.size(withAttributes: attrs)
         let padding: CGFloat = 4
-        var labelOrigin = NSPoint(
-            x: currentRect.maxX - size.width - padding * 2,
-            y: currentRect.minY - size.height - padding * 2 - 2
+        var origin = NSPoint(
+            x: rect.maxX - size.width - padding * 2,
+            y: rect.minY - size.height - padding * 2 - 2
         )
-        if labelOrigin.y < 0 {
-            labelOrigin.y = currentRect.maxY + 2
+        if origin.y < 0 {
+            origin.y = rect.maxY + 2
         }
         let bg = NSRect(
-            x: labelOrigin.x,
-            y: labelOrigin.y,
+            x: origin.x,
+            y: origin.y,
             width: size.width + padding * 2,
             height: size.height + padding * 2
         )
         NSColor.black.withAlphaComponent(0.7).setFill()
         NSBezierPath(roundedRect: bg, xRadius: 3, yRadius: 3).fill()
         label.draw(
-            at: NSPoint(x: labelOrigin.x + padding, y: labelOrigin.y + padding),
+            at: NSPoint(x: origin.x + padding, y: origin.y + padding),
             withAttributes: attrs
         )
     }
