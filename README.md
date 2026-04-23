@@ -4,7 +4,7 @@
 
 # ShotX
 
-<img width="614" height="1094" alt="image" src="https://github.com/user-attachments/assets/951f6284-b027-4c16-a01d-eb6a435ff180" />
+<img width="300" height="500" alt="image" src="https://github.com/user-attachments/assets/951f6284-b027-4c16-a01d-eb6a435ff180" />
 
 
 **Modern macOS screen capture for the menu bar.**
