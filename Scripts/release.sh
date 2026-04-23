@@ -107,13 +107,6 @@ gh release create "$TAG" "$DMG_PATH" \
     --notes "$(cat <<EOF
 $COMMIT_MSG
 
-## Install
-
-1. Download \`ShotX-$VERSION.dmg\` below
-2. Mount and drag **ShotX.app** to **Applications**
-3. Right-click → **Open** the first time (Gatekeeper warning since the app is ad-hoc signed)
-4. Grant **Screen Recording** permission when prompted, then quit and re-open
-
 ## Requirements
 
 macOS 13.0 or later
