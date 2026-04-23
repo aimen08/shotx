@@ -17,6 +17,7 @@ final class RecordingController {
     private var recorder: AnyObject?
     private var completePopup = RecordingCompletePopupController()
     private var frameOverlay = RecordingFrameOverlay()
+    private var clickHighlight: ClickHighlightWindow?
 
     private var currentRect: CGRect?
 
@@ -135,14 +136,33 @@ final class RecordingController {
             }
         }
 
+        // Click-highlight overlay — created here so ScreenCaptureKit can include
+        // its window as an exception to our app exclusion filter.
+        var clickWindowID: CGWindowID? = nil
+        if options.highlightClicks {
+            let overlay = ClickHighlightWindow()
+            overlay.show()
+            clickWindowID = overlay.cgWindowID
+            clickHighlight = overlay
+        }
+
         // Extract Sendable primitives from NSScreen so we don't have to send the
         // class instance across the actor boundary into the Task.
         let display = CaptureDisplay(screen)
         let showsCursor = options.showCursor
+        let captureSystem = options.captureSystemAudio
+        let captureMic = options.captureMicrophone
 
         Task { [weak self] in
             do {
-                try await recorder.start(rect: rect, display: display, showsCursor: showsCursor)
+                try await recorder.start(
+                    rect: rect,
+                    display: display,
+                    showsCursor: showsCursor,
+                    captureSystemAudio: captureSystem,
+                    captureMicrophone: captureMic,
+                    exceptingWindowID: clickWindowID
+                )
                 guard let self = self else { return }
                 self.isRecording = true
                 self.startDate = Date()
@@ -150,6 +170,8 @@ final class RecordingController {
             } catch {
                 guard let self = self else { return }
                 self.recorder = nil
+                self.clickHighlight?.dismiss()
+                self.clickHighlight = nil
                 self.failRecording(error: error)
             }
         }
@@ -168,6 +190,8 @@ final class RecordingController {
             self.recorder = nil
             self.dismissStopPill()
             self.frameOverlay.dismiss()
+            self.clickHighlight?.dismiss()
+            self.clickHighlight = nil
             self.currentRect = nil
             self.handleFinished(tempURL: maybeURL, duration: duration, dimensions: dimensions)
         }
@@ -177,6 +201,8 @@ final class RecordingController {
         isRecording = false
         dismissStopPill()
         frameOverlay.dismiss()
+        clickHighlight?.dismiss()
+        clickHighlight = nil
         currentRect = nil
         recorder = nil
         ToastController.shared.show(

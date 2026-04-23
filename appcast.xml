@@ -7,6 +7,15 @@
         <language>en</language>
 
         <item>
+            <title>Version 1.9.1</title>
+            <pubDate>Thu, 23 Apr 2026 19:06:09 +0000</pubDate>
+            <sparkle:version>1.9.1</sparkle:version>
+            <sparkle:shortVersionString>1.9.1</sparkle:shortVersionString>
+            <sparkle:minimumSystemVersion>13.0</sparkle:minimumSystemVersion>
+            <enclosure url="https://github.com/aimen08/shotx/releases/download/v1.9.1/ShotX-1.9.1.dmg" length="2194810" type="application/octet-stream" sparkle:edSignature="Z75YvVOrWqnlFmAHxD+PQHQs00z2+8SyLERYhGwqCqjeEO7X/D2ouz9DqpDhwl5kc0/vKfmZoM6U9oSxPpaiBw==" />
+        </item>
+
+        <item>
             <title>Version 1.9</title>
             <pubDate>Thu, 23 Apr 2026 18:39:07 +0000</pubDate>
             <sparkle:version>1.9</sparkle:version>

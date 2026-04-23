@@ -30,24 +30,43 @@ if [ -z "$BRANCH" ]; then
 fi
 
 # --- Determine version
+#
+# Versioning policy: trunk is locked at 1.9.x. Auto-bump always produces
+# 1.9.(N+1). Manually passing anything above 1.9.99 is refused.
 INPUT_VERSION="${1:-}"
 if [ -z "$INPUT_VERSION" ]; then
     LATEST=$(gh release list --limit 1 --json tagName --jq '.[0].tagName // ""' 2>/dev/null || true)
     LATEST="${LATEST#v}"
-    if [[ "$LATEST" =~ ^([0-9]+)\.([0-9]+)\.([0-9]+)$ ]]; then
-        VERSION="${BASH_REMATCH[1]}.${BASH_REMATCH[2]}.$((${BASH_REMATCH[3]} + 1))"
-    elif [[ "$LATEST" =~ ^([0-9]+)\.([0-9]+)$ ]]; then
-        VERSION="${BASH_REMATCH[1]}.$((${BASH_REMATCH[2]} + 1))"
+    if [[ "$LATEST" =~ ^1\.9\.([0-9]+)$ ]]; then
+        NEXT_PATCH=$((${BASH_REMATCH[1]} + 1))
+        VERSION="1.9.$NEXT_PATCH"
+    elif [[ "$LATEST" == "1.9" ]]; then
+        VERSION="1.9.1"
     else
-        VERSION="1.0"
+        # First release in the 1.9.x series starts at 1.9.1 (1.9 already exists)
+        VERSION="1.9.1"
     fi
     if [ -n "$LATEST" ]; then
         echo "→ Auto-bumping to v$VERSION (previous: v$LATEST)"
     else
-        echo "→ Starting at v$VERSION (no previous releases)"
+        echo "→ Starting at v$VERSION"
     fi
 else
     VERSION="$INPUT_VERSION"
+fi
+
+# Policy guard — refuse anything outside 1.9.x (including 1.9.100+).
+if [[ ! "$VERSION" =~ ^1\.9(\.[0-9]+)?$ ]]; then
+    echo "✗ Version '$VERSION' is outside the locked 1.9.x series."
+    echo "  Trunk is pinned at 1.9.x (up to 1.9.99). Refusing to release."
+    exit 1
+fi
+if [[ "$VERSION" =~ ^1\.9\.([0-9]+)$ ]]; then
+    PATCH=${BASH_REMATCH[1]}
+    if [ "$PATCH" -gt 99 ]; then
+        echo "✗ Version '$VERSION' exceeds 1.9.99. Series cap reached."
+        exit 1
+    fi
 fi
 
 TAG="v$VERSION"

@@ -3,6 +3,9 @@ import SwiftUI
 
 struct RecordingOptions {
     var showCursor: Bool = true
+    var highlightClicks: Bool = false
+    var captureSystemAudio: Bool = false
+    var captureMicrophone: Bool = false
 }
 
 struct RecordingOptionsView: View {
@@ -12,7 +15,19 @@ struct RecordingOptionsView: View {
     let onCancel: () -> Void
 
     @State private var showCursor = true
+    @State private var highlightClicks = false
+    @State private var captureSystemAudio = false
+    @State private var captureMicrophone = false
     @State private var appeared = false
+
+    private var currentOptions: RecordingOptions {
+        RecordingOptions(
+            showCursor: showCursor,
+            highlightClicks: highlightClicks,
+            captureSystemAudio: captureSystemAudio,
+            captureMicrophone: captureMicrophone
+        )
+    }
 
     var body: some View {
         VStack(spacing: 8) {
@@ -36,10 +51,11 @@ struct RecordingOptionsView: View {
             DimensionDisplay(width: Int(dimensions.width), height: Int(dimensions.height))
             Spacer(minLength: 6)
             HStack(spacing: 2) {
-                CompactToggle(icon: "mic", binding: .constant(false), enabled: false, tooltip: "Microphone — coming soon")
-                CompactToggle(icon: "speaker.wave.2", binding: .constant(false), enabled: false, tooltip: "System audio — coming soon")
+                CompactToggle(icon: "mic", binding: $captureMicrophone, enabled: true, tooltip: "Microphone")
+                CompactToggle(icon: "speaker.wave.2", binding: $captureSystemAudio, enabled: true, tooltip: "System audio")
+                CompactToggle(icon: "cursorarrow", binding: $showCursor, enabled: true, tooltip: "Show cursor")
+                CompactToggle(icon: "cursorarrow.click", binding: $highlightClicks, enabled: true, tooltip: "Highlight clicks")
                 CompactToggle(icon: "camera", binding: .constant(false), enabled: false, tooltip: "Camera — coming soon")
-                CompactToggle(icon: "cursorarrow.click", binding: $showCursor, enabled: true, tooltip: "Show cursor")
                 CompactToggle(icon: "keyboard", binding: .constant(false), enabled: false, tooltip: "Keystrokes — coming soon")
             }
         }
@@ -56,7 +72,7 @@ struct RecordingOptionsView: View {
                 suffix: "",
                 enabled: true,
                 prominent: false,
-                action: { onRecordGIF(RecordingOptions(showCursor: showCursor)) }
+                action: { onRecordGIF(currentOptions) }
             )
             Rectangle()
                 .fill(Color.white.opacity(0.06))
@@ -67,7 +83,7 @@ struct RecordingOptionsView: View {
                 suffix: "↩",
                 enabled: true,
                 prominent: true,
-                action: { onRecordVideo(RecordingOptions(showCursor: showCursor)) }
+                action: { onRecordVideo(currentOptions) }
             )
             .keyboardShortcut(.defaultAction)
         }

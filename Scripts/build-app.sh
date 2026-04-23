@@ -118,6 +118,8 @@ cat > "$CONTENTS/Info.plist" <<EOF
     <true/>
     <key>NSScreenCaptureUsageDescription</key>
     <string>ShotX needs to capture your screen to take screenshots and recordings.</string>
+    <key>NSMicrophoneUsageDescription</key>
+    <string>ShotX records microphone audio for your screen recordings when enabled.</string>
     <key>NSAppleEventsUsageDescription</key>
     <string>ShotX uses Apple Events to control Finder for the desktop-icons toggle.</string>
     <key>SUFeedURL</key>
