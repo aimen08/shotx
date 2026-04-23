@@ -608,10 +608,12 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
             ]) { _, new in new }
         ))
 
-        // applicationName + applicationVersion auto-populate from the bundle's
-        // Info.plist (CFBundleName / CFBundleShortVersionString), which is set
-        // per-release by Scripts/build-app.sh.
+        // applicationName auto-populates from CFBundleName.
+        // The "Version X" line uses CFBundleShortVersionString automatically.
+        // Pass an empty .applicationVersion (CFBundleVersion) so the panel
+        // doesn't render "Version 1.6 (1.6)" when both are the same string.
         NSApp.orderFrontStandardAboutPanel(options: [
+            .applicationVersion: "",
             .credits: credits
         ])
     }
