@@ -20,6 +20,11 @@ struct Shortcut: Codable, Equatable {
         keyCode: UInt32(kVK_ANSI_X),
         modifiers: UInt32(optionKey | shiftKey)
     )
+
+    static let defaultOCR = Shortcut(
+        keyCode: UInt32(kVK_ANSI_T),
+        modifiers: UInt32(optionKey | shiftKey)
+    )
 }
 
 final class ShortcutStore: ObservableObject {
@@ -37,14 +42,20 @@ final class ShortcutStore: ObservableObject {
         didSet { Self.persist(fullscreenShortcut, key: fullscreenKey) }
     }
 
+    @Published var ocrShortcut: Shortcut {
+        didSet { Self.persist(ocrShortcut, key: ocrKey) }
+    }
+
     private let captureKey = "com.shotx.shortcut"
     private let colorPickerKey = "com.shotx.colorPickerShortcut"
     private let fullscreenKey = "com.shotx.fullscreenShortcut"
+    private let ocrKey = "com.shotx.ocrShortcut"
 
     init() {
         shortcut = Self.load(key: "com.shotx.shortcut") ?? .default
         colorPickerShortcut = Self.load(key: "com.shotx.colorPickerShortcut") ?? .defaultColorPicker
         fullscreenShortcut = Self.load(key: "com.shotx.fullscreenShortcut") ?? .defaultFullscreen
+        ocrShortcut = Self.load(key: "com.shotx.ocrShortcut") ?? .defaultOCR
     }
 
     private static func load(key: String) -> Shortcut? {

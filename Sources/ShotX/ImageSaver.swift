@@ -24,4 +24,10 @@ enum ImageSaver {
         pb.clearContents()
         pb.writeObjects([image])
     }
+
+    static func copyTextToClipboard(_ text: String) {
+        let pb = NSPasteboard.general
+        pb.clearContents()
+        pb.setString(text, forType: .string)
+    }
 }

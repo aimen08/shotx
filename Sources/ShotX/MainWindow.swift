@@ -441,6 +441,20 @@ struct SettingsView: View {
                                 .foregroundStyle(.secondary)
                                 .font(.system(size: 12))
                         }
+                        Rectangle()
+                            .fill(Color.primary.opacity(0.08))
+                            .frame(height: 0.5)
+                        HStack {
+                            Text("Extract text (OCR)")
+                                .font(.system(size: 13))
+                            Spacer()
+                            ShortcutRecorder(shortcut: $shortcuts.ocrShortcut)
+                                .frame(width: 150, height: 28)
+                            Button("Reset") { shortcuts.ocrShortcut = .defaultOCR }
+                                .buttonStyle(.borderless)
+                                .foregroundStyle(.secondary)
+                                .font(.system(size: 12))
+                        }
                         Text("Click the field and press a new combination. Escape to cancel.")
                             .font(.system(size: 11))
                             .foregroundStyle(.secondary)

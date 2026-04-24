@@ -7,6 +7,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
     private var hotKeyManager: HotKeyManager!
     private var colorPickerHotKeyManager: HotKeyManager!
     private var fullscreenHotKeyManager: HotKeyManager!
+    private var ocrHotKeyManager: HotKeyManager!
     private var overlayController: OverlayController?
     private var popupController: PostCapturePopupController?
     private var annotationController: AnnotationWindowController?
@@ -171,6 +172,13 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
             action: #selector(captureWindow)
         ))
 
+        menu.addItem(menuItem(
+            title: "Extract Text (OCR)",
+            symbol: "doc.text.viewfinder",
+            action: #selector(captureTextNow),
+            shortcut: ShortcutStore.shared.ocrShortcut
+        ))
+
         menu.addItem(.separator())
 
         let recording = MainActor.assumeIsolated { RecordingController.shared.isRecording }
@@ -325,10 +333,12 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
         hotKeyManager = HotKeyManager()
         colorPickerHotKeyManager = HotKeyManager()
         fullscreenHotKeyManager = HotKeyManager()
+        ocrHotKeyManager = HotKeyManager()
 
         applyCaptureShortcut(ShortcutStore.shared.shortcut)
         applyColorPickerShortcut(ShortcutStore.shared.colorPickerShortcut)
         applyFullscreenShortcut(ShortcutStore.shared.fullscreenShortcut)
+        applyOCRShortcut(ShortcutStore.shared.ocrShortcut)
 
         // @Published fires BEFORE willSet, so reading the property in the sink
         // would still see the old value. Use the new value from the publisher.
@@ -345,6 +355,11 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
         ShortcutStore.shared.$fullscreenShortcut
             .dropFirst()
             .sink { [weak self] new in self?.applyFullscreenShortcut(new) }
+            .store(in: &shortcutCancellables)
+
+        ShortcutStore.shared.$ocrShortcut
+            .dropFirst()
+            .sink { [weak self] new in self?.applyOCRShortcut(new) }
             .store(in: &shortcutCancellables)
     }
 
@@ -363,6 +378,12 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
     private func applyFullscreenShortcut(_ s: Shortcut) {
         fullscreenHotKeyManager.register(keyCode: s.keyCode, modifiers: s.modifiers) { [weak self] in
             self?.captureFullscreen()
+        }
+    }
+
+    private func applyOCRShortcut(_ s: Shortcut) {
+        ocrHotKeyManager.register(keyCode: s.keyCode, modifiers: s.modifiers) { [weak self] in
+            self?.captureTextNow()
         }
     }
 
@@ -465,6 +486,24 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
             self?.windowCaptureController = nil
             guard let image = image else { return }
             self?.handleCapturedImage(image)
+        }
+    }
+
+    @objc func captureTextNow() {
+        guard overlayController == nil else { return }
+        guard ensurePermissionOrPrompt() else { return }
+        let controller = OverlayController()
+        overlayController = controller
+        controller.begin { [weak self] image, _, _ in
+            self?.overlayController = nil
+            // Convert to CGImage on the main thread before hopping onto a Task —
+            // CGImage is Sendable, NSImage is not.
+            guard let nsImage = image,
+                  let cgImage = MainActor.assumeIsolated({ OCR.cgImage(from: nsImage) })
+            else { return }
+            Task { @MainActor in
+                await OCR.runAndCopy(from: cgImage)
+            }
         }
     }
 
