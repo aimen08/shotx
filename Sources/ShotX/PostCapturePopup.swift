@@ -176,7 +176,7 @@ struct PostCapturePopupView: View {
 
     private var expandedView: some View {
         ZStack {
-            // Image area — supports drag-out to other apps
+            // Image area — supports drag-out to other apps + double-click to edit
             ZStack {
                 Color.black.opacity(0.4)
                 Image(nsImage: image)
@@ -186,6 +186,7 @@ struct PostCapturePopupView: View {
             }
             .clipShape(RoundedRectangle(cornerRadius: 14))
             .onDrag { exportProvider() }
+            .onTapGesture(count: 2) { onEdit() }
 
             if hovering {
                 Color.black.opacity(0.32)
@@ -420,36 +421,3 @@ private struct CenterButton: View {
     }
 }
 
-// Kept for RecordingCompletePopup to reuse
-struct PopupActionButton: View {
-    let icon: String
-    let label: String
-    let prominent: Bool
-    let action: () -> Void
-    @State private var hovering = false
-
-    var body: some View {
-        Button(action: action) {
-            HStack(spacing: 3) {
-                Image(systemName: icon)
-                    .font(.system(size: 9, weight: .bold))
-                Text(label)
-                    .font(.system(size: 11, weight: .semibold))
-            }
-            .padding(.horizontal, 9)
-            .padding(.vertical, 4)
-            .foregroundStyle(prominent ? Color.white : Color.primary)
-            .background(
-                RoundedRectangle(cornerRadius: 6)
-                    .fill(
-                        prominent
-                            ? Color.accentColor
-                            : Color.primary.opacity(hovering ? 0.12 : 0.08)
-                    )
-            )
-        }
-        .buttonStyle(.plain)
-        .onHover { hovering = $0 }
-        .animation(.easeOut(duration: 0.12), value: hovering)
-    }
-}

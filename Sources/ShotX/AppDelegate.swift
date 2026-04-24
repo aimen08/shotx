@@ -1,6 +1,5 @@
 import Cocoa
 import Combine
-import Carbon.HIToolbox
 import UniformTypeIdentifiers
 
 final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
@@ -583,13 +582,6 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
     }
 
     // MARK: - Windows
-
-    @objc func showMainWindow() {
-        if mainWindowController == nil {
-            mainWindowController = MainWindowController()
-        }
-        mainWindowController?.show()
-    }
 
     @objc private func showHistory() {
         if mainWindowController == nil {
