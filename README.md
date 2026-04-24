@@ -124,6 +124,24 @@ open dist/ShotX-*.dmg
 
 ---
 
+## Marketing website
+
+A Vite + React homepage lives in `website/`, ready to deploy on Netlify (point it at the repo — `website/netlify.toml` handles the build settings).
+
+```bash
+cd website
+npm install
+npm run dev       # local preview at http://localhost:5173
+npm run build     # static bundle → website/dist
+```
+
+Highlights:
+- Two hero sections ported from a Claude-designed artboard — scaled pixel-perfect on desktop via `ScaledArtboard`, and a dedicated stacked layout below 820px.
+- Sections: Features grid, keyboard-shortcuts showcase, final CTA, footer.
+- All download / view-source CTAs link to this repo's [latest release](https://github.com/aimen08/shotx/releases/latest).
+
+---
+
 ## Stable code signing (optional, recommended)
 
 By default, builds are **ad-hoc signed**, which means each rebuild produces a new code identity and macOS revokes Screen Recording permission on every update. To keep permissions persistent across updates without paying for an Apple Developer ID:

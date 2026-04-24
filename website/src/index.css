@@ -1,0 +1,19 @@
+:root {
+  --shotx-blue-1: #6A9BFF;
+  --shotx-blue-2: #4A7BEE;
+  --shotx-blue-3: #2E5BD8;
+  --shotx-blue-4: #1E3FA8;
+  --shotx-orange: #F08A2B;
+}
+
+html, body, #root {
+  margin: 0;
+  padding: 0;
+  background: #050710;
+  color: #fff;
+  font-family: 'Inter', -apple-system, system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+* { box-sizing: border-box; }
