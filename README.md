@@ -8,7 +8,7 @@
 
 
 **Modern macOS screen capture for the menu bar.**
-Screenshots, screen recording, GIF export, in-place annotation, color picker, and a searchable history — without ever leaving your keyboard.
+Screenshots, screen recording, GIF export, in-place annotation, color picker, OCR text extraction, and a searchable history — without ever leaving your keyboard.
 
 ![macOS](https://img.shields.io/badge/macOS-13%2B-007AFF?style=flat&logo=apple&logoColor=white)
 ![Swift](https://img.shields.io/badge/Swift-5.9-F05138?style=flat&logo=swift&logoColor=white)
@@ -27,6 +27,7 @@ Screenshots, screen recording, GIF export, in-place annotation, color picker, an
 - **Screenshots** — region, window, fullscreen, previous area; self-timer (3 / 5 / 10 s); open any image from clipboard or file
 - **Screen recording** — H.264 MP4 or GIF (12 fps, 720 px) via ScreenCaptureKit, with microphone and system audio
 - **Annotate** — arrows, rectangles, text, numbered steps; 8-color palette; copy or save in one keystroke
+- **Extract text (OCR)** — drag a region, Apple Vision recognizes the text, and it lands on your clipboard
 - **History** — last 100 captures on disk, searchable, with thumbnails
 - **Color picker** — native loupe, hex copied to clipboard
 - **Pin, drag-out, auto-updates** — float screenshots on top, drag into any app, Sparkle-signed updates
@@ -39,13 +40,15 @@ Screenshots, screen recording, GIF export, in-place annotation, color picker, an
 | Action                  | Shortcut |
 |-------------------------|----------|
 | Capture region          | `⌥X`     |
+| Capture fullscreen      | `⌥⇧X`    |
+| Extract text (OCR)      | `⌥⇧T`    |
 | Pick color              | `⌥⇧C`    |
 | Stop recording          | `⌘.`     |
 | Open from clipboard     | `⇧⌘V`    |
 | Settings                | `⌘,`     |
 | Quit                    | `⌘Q`     |
 
-Both shortcuts are configurable in **Settings → Shortcuts**.
+All four global shortcuts are configurable in **Settings → Shortcuts**.
 
 ---
 

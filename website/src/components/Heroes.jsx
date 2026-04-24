@@ -56,7 +56,7 @@ export const HeroClassic = () => (
         <span style={{ background:'linear-gradient(90deg,#6A9BFF,#C8D4F0)', WebkitBackgroundClip:'text', WebkitTextFillColor:'transparent' }}>Annotate instantly.</span>
       </h1>
       <p style={{ fontSize: 19, lineHeight: 1.5, color:'rgba(235,235,245,.68)', maxWidth: 520, marginTop: 26, fontWeight: 400 }}>
-        Modern macOS screen capture for the menu bar. Screenshots, screen recording, GIF export, in-place annotation, and a searchable history — without ever leaving your keyboard.
+        Modern macOS screen capture for the menu bar. Screenshots, recording, GIFs, OCR text extraction, annotation, and a searchable history — without ever leaving your keyboard.
       </p>
       <div style={{ display:'flex', alignItems:'center', gap: 12, marginTop: 32, flexWrap:'wrap' }}>
         <a href={DOWNLOAD_URL} target="_blank" rel="noreferrer" style={{ ...linkReset, display:'inline-flex', alignItems:'center', gap: 10, padding:'14px 24px', borderRadius: 12, background:'#fff', color:'#0A0E1A', fontSize: 15, fontWeight: 600, boxShadow:'0 20px 40px rgba(106,155,255,.22)' }}>
@@ -320,7 +320,7 @@ export const HeroMinimal = () => (
         Screen capture,<br/>without the fuss.
       </h1>
       <p style={{ fontSize: 18, color:'rgba(10,14,26,.55)', maxWidth: 680, margin: '24px auto 0', lineHeight: 1.5 }}>
-        Screenshots, recording, GIF export, in-place annotation, and a searchable history — all from the menu bar, all on your keyboard.
+        Screenshots, recording, GIFs, OCR text extraction, annotation, and a searchable history — all from the menu bar, all on your keyboard.
       </p>
     </div>
 
@@ -364,7 +364,7 @@ const MobileHeroClassic = () => (
         <span style={{ background:'linear-gradient(90deg,#6A9BFF,#C8D4F0)', WebkitBackgroundClip:'text', WebkitTextFillColor:'transparent' }}>Annotate instantly.</span>
       </h1>
       <p style={{ fontSize: 16, lineHeight: 1.55, color: 'rgba(235,235,245,.68)', margin: '20px 0 0', fontWeight: 400 }}>
-        Modern macOS screen capture for the menu bar. Screenshots, recording, GIF export, annotation, and a searchable history — all from your keyboard.
+        Modern macOS screen capture for the menu bar. Screenshots, recording, GIFs, OCR, annotation, and a searchable history — all from your keyboard.
       </p>
 
       <div style={{ display: 'flex', flexDirection: 'column', gap: 10, marginTop: 28 }}>

@@ -78,6 +78,10 @@ export const Icon = ({ name, size = 18, stroke = 1.75, color = 'currentColor' })
       return <svg {...common}><rect x="2" y="8" width="18" height="9" rx="2"/><path d="M22 11v3"/><rect x="4" y="10" width="12" height="5" rx="1" fill={color} stroke="none"/></svg>;
     case 'search':
       return <svg {...common}><circle cx="11" cy="11" r="6"/><path d="M20 20l-4-4"/></svg>;
+    case 'textscan':
+      return <svg {...common}><path d="M4 8V6a2 2 0 0 1 2-2h2"/><path d="M16 4h2a2 2 0 0 1 2 2v2"/><path d="M20 16v2a2 2 0 0 1-2 2h-2"/><path d="M8 20H6a2 2 0 0 1-2-2v-2"/><path d="M7 10h10"/><path d="M7 14h6"/></svg>;
+    case 'eyedropper':
+      return <svg {...common}><path d="M14 4l6 6"/><path d="M16 2l6 6-3 3-6-6z"/><path d="M13 7l4 4L6.5 21.5a1.8 1.8 0 0 1-2.5 0 1.8 1.8 0 0 1 0-2.5z"/></svg>;
     default: return null;
   }
 };
@@ -161,6 +165,7 @@ export const ShotXMenu = ({ scale = 1 }) => (
     <MenuRow scale={scale} icon="previous" label="Capture Previous Area" />
     <MenuRow scale={scale} icon="fullscreen" label="Capture Fullscreen" />
     <MenuRow scale={scale} icon="window" label="Capture Window" />
+    <MenuRow scale={scale} icon="textscan" label="Extract Text (OCR)" shortcut="⌥⇧T"/>
     <MenuSep scale={scale}/>
     <MenuRow scale={scale} icon="camera" label="Record Screen" />
     <MenuRow scale={scale} icon="timer" label="Self-Timer" shortcut={<Icon name="chevron" size={11*scale} stroke={2}/>}/>

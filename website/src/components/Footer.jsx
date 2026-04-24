@@ -22,7 +22,7 @@ export default function Footer() {
             <div style={{ fontSize: 20, fontWeight: 700, letterSpacing: -.3 }}>ShotX</div>
           </div>
           <p style={{ fontSize: 14, lineHeight: 1.55, color: 'rgba(235,235,245,.55)', margin: 0, maxWidth: 320 }}>
-            Modern macOS screen capture for the menu bar. Screenshots, screen recording, GIF export, annotation, and searchable history — all from your keyboard.
+            Modern macOS screen capture for the menu bar. Screenshots, recording, GIFs, OCR, annotation, and a searchable history — all from your keyboard.
           </p>
         </div>
 

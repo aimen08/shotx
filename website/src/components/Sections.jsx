@@ -25,6 +25,7 @@ const FEATURES = [
   { icon: 'area',      title: 'Screenshots, every shape',   text: 'Area, fullscreen, window, and previous-area capture — all from a global shortcut or the menu bar.' },
   { icon: 'record',    title: 'Screen recording',           text: 'MP4 or GIF export, microphone and system audio, with mouse-click highlights for demos.' },
   { icon: 'arrow',     title: 'Annotate in place',          text: 'Arrows, rectangles, text, and numbered callouts — copy straight to clipboard when you\'re done.' },
+  { icon: 'textscan',  title: 'Extract text (OCR)',         text: 'Drag a region, Apple Vision recognizes the text on-device, and it lands on your clipboard.' },
   { icon: 'history',   title: 'Searchable history',         text: 'Every capture kept locally, with thumbnails and quick re-open. Nothing leaves your Mac.' },
   { icon: 'timer',     title: 'Self-timer & pin',           text: 'Stage tricky shots with a self-timer, and pin captures on top of any window while you compare.' },
   { icon: 'power',     title: 'Free and open source',       text: 'MIT licensed. Universal binary for Apple Silicon and Intel. Auto-updates via Sparkle.' },
@@ -77,12 +78,12 @@ const KeyCap = ({ children, wide }) => (
 const Plus = () => <div style={{ fontSize: 14, color: 'rgba(235,235,245,.35)', fontWeight: 400 }}>+</div>;
 
 const SHORTCUTS = [
-  { keys: ['⌥', 'X'], label: 'Capture area',         icon: 'area' },
-  { keys: ['⌥', 'D'], label: 'Capture fullscreen',   icon: 'fullscreen' },
-  { keys: ['⌥', 'W'], label: 'Capture window',       icon: 'window' },
-  { keys: ['⌥', 'R'], label: 'Record screen',        icon: 'record' },
-  { keys: ['⌥', 'T'], label: 'Self-timer',           icon: 'timer' },
-  { keys: ['⌥', 'H'], label: 'Open history',         icon: 'history' },
+  { keys: ['⌥', 'X'],  label: 'Capture area',        icon: 'area' },
+  { keys: ['⌥⇧', 'X'], label: 'Capture fullscreen',  icon: 'fullscreen' },
+  { keys: ['⌥⇧', 'T'], label: 'Extract text (OCR)', icon: 'textscan' },
+  { keys: ['⌥⇧', 'C'], label: 'Pick color',          icon: 'eyedropper' },
+  { keys: ['⌘', '.'],  label: 'Stop recording',      icon: 'record' },
+  { keys: ['⇧⌘', 'V'], label: 'Open from clipboard', icon: 'clipboard' },
 ];
 
 export const ShortcutsSection = () => {
@@ -116,9 +117,9 @@ export const ShortcutsSection = () => {
             </div>
             <div style={{ fontSize: 15, color: 'rgba(235,235,245,.85)', fontWeight: 500 }}>{s.label}</div>
             <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-              <KeyCap>{s.keys[0]}</KeyCap>
+              <KeyCap wide={s.keys[0].length > 1}>{s.keys[0]}</KeyCap>
               <Plus/>
-              <KeyCap>{s.keys[1]}</KeyCap>
+              <KeyCap wide={s.keys[1].length > 1}>{s.keys[1]}</KeyCap>
             </div>
           </div>
         ))}
