@@ -14,8 +14,9 @@ Screenshots, screen recording, GIF export, in-place annotation, color picker, an
 ![Swift](https://img.shields.io/badge/Swift-5.9-F05138?style=flat&logo=swift&logoColor=white)
 ![Menu bar](https://img.shields.io/badge/menu%20bar-only-1F2937?style=flat)
 [![Latest release](https://img.shields.io/github/v/release/aimen08/shotx?style=flat&color=22C55E)](https://github.com/aimen08/shotx/releases/latest)
+[![Buy Me a Coffee](https://img.shields.io/badge/Buy%20me%20a%20coffee-FFDD00?style=flat&logo=buymeacoffee&logoColor=black)](https://buymeacoffee.com/aimen08)
 
-[**↓ Download**](https://github.com/aimen08/shotx/releases/latest) · [Features](#features) · [Build from source](#build-from-source) · [Project layout](#project-layout)
+[**↓ Download**](https://github.com/aimen08/shotx/releases/latest) · [Features](#features) · [Build from source](#build-from-source) · [Support](#support)
 
 </div>
 
@@ -231,6 +232,16 @@ After setup, `Scripts/release.sh` automatically:
 - [ ] Scrolling capture (stitched long-form screenshots)
 - [ ] Notarized / Developer ID-signed distribution
 - [ ] Custom DMG background
+
+---
+
+## Support
+
+ShotX is free and open source. If it saves you some time, you can keep it fueled:
+
+<a href="https://buymeacoffee.com/aimen08"><img src="https://img.buymeacoffee.com/button-api/?text=Buy me a coffee&emoji=☕&slug=aimen08&button_colour=FFDD00&font_colour=000000&font_family=Inter&outline_colour=000000&coffee_colour=ffffff" alt="Buy Me a Coffee — aimen08" height="42"></a>
+
+Every coffee helps keep new features, bug fixes, and auto-update infra running.
 
 ---
 
