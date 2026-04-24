@@ -1,0 +1,12 @@
+{
+  "name": "ShotX",
+  "short_name": "ShotX",
+  "description": "Modern macOS screen capture for the menu bar.",
+  "icons": [
+    { "src": "/icon-192.png", "sizes": "192x192", "type": "image/png" },
+    { "src": "/icon-512.png", "sizes": "512x512", "type": "image/png" }
+  ],
+  "theme_color": "#050710",
+  "background_color": "#050710",
+  "display": "browser"
+}
