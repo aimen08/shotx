@@ -64,7 +64,7 @@ final class ScreenRecorder: NSObject, @unchecked Sendable {
         showsCursor: Bool,
         captureSystemAudio: Bool = false,
         captureMicrophone: Bool = false,
-        exceptingWindowID: CGWindowID? = nil
+        exceptingWindowIDs: [CGWindowID] = []
     ) async throws {
         let content = try await SCShareableContent.excludingDesktopWindows(
             false,
@@ -90,13 +90,11 @@ final class ScreenRecorder: NSObject, @unchecked Sendable {
         let selfPID = NSRunningApplication.current.processIdentifier
         let excludeApps = content.applications.filter { $0.processID == selfPID }
 
-        // If the caller wants a specific window of ours included in the capture
-        // (e.g. the click-highlight overlay), look it up and pass it as an
-        // exception to the app exclusion.
-        var exceptingWindows: [SCWindow] = []
-        if let wid = exceptingWindowID,
-           let win = content.windows.first(where: { $0.windowID == wid }) {
-            exceptingWindows.append(win)
+        // If the caller wants specific windows of ours included in the capture
+        // (click-highlight overlay, webcam circle, …), look them up and pass
+        // them as exceptions to the app exclusion.
+        let exceptingWindows: [SCWindow] = exceptingWindowIDs.compactMap { wid in
+            content.windows.first(where: { $0.windowID == wid })
         }
 
         let filter = SCContentFilter(

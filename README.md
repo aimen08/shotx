@@ -8,7 +8,7 @@
 
 
 **Modern macOS screen capture for the menu bar.**
-Screenshots, screen recording, GIF export, in-place annotation, color picker, OCR text extraction, and a searchable history — without ever leaving your keyboard.
+Screenshots, screen recording with webcam overlay, GIF export, in-place annotation, color picker, OCR text extraction, and a searchable history — without ever leaving your keyboard.
 
 ![macOS](https://img.shields.io/badge/macOS-13%2B-007AFF?style=flat&logo=apple&logoColor=white)
 ![Swift](https://img.shields.io/badge/Swift-5.9-F05138?style=flat&logo=swift&logoColor=white)
@@ -25,7 +25,8 @@ Screenshots, screen recording, GIF export, in-place annotation, color picker, OC
 ## Features
 
 - **Screenshots** — region, window, fullscreen, previous area; self-timer (3 / 5 / 10 s); open any image from clipboard or file
-- **Screen recording** — H.264 MP4 or GIF (12 fps, 720 px) via ScreenCaptureKit, with microphone and system audio
+- **Screen recording** — H.264 MP4 or GIF (12 fps, 720 px) via ScreenCaptureKit, with microphone, system audio, and click highlights
+- **Webcam overlay** — circular self-view in the bottom-left of the recording region; drag to reposition and resize during preview, baked into the final video
 - **Annotate** — arrows, rectangles, text, numbered steps; 8-color palette; copy or save in one keystroke
 - **Extract text (OCR)** — drag a region, Apple Vision recognizes the text, and it lands on your clipboard
 - **History** — last 100 captures on disk, searchable, with thumbnails
@@ -95,7 +96,6 @@ cd website && npm install && npm run dev
 
 ## Roadmap
 
-- [ ] Webcam overlay
 - [ ] Keystroke visualization in recordings
 - [ ] Scrolling capture (stitched long-form screenshots)
 - [ ] Notarized / Developer ID-signed distribution

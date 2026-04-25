@@ -18,6 +18,7 @@ final class RecordingController {
     private var completePopup = RecordingCompletePopupController()
     private var frameOverlay = RecordingFrameOverlay()
     private var clickHighlight: ClickHighlightWindow?
+    private var webcam: WebcamWindow?
 
     private var currentRect: CGRect?
 
@@ -59,7 +60,10 @@ final class RecordingController {
                 self?.frameOverlay.setRecording(true)
                 self?.beginRecording(rect: rect, screen: screen, options: options)
             },
-            onCancel: { [weak self] in self?.cancelOptions() }
+            onCancel: { [weak self] in self?.cancelOptions() },
+            onWebcamToggle: { [weak self] enabled in
+                self?.handleWebcamToggle(enabled, rect: rect)
+            }
         )
 
         let hosting = NSHostingController(rootView: view)
@@ -103,7 +107,31 @@ final class RecordingController {
     private func cancelOptions() {
         tearDownOptionsPanel()
         frameOverlay.dismiss()
+        webcam?.dismiss()
+        webcam = nil
         currentRect = nil
+    }
+
+    /// Called from the options view when the user toggles the camera.
+    /// Spawns / dismisses the live webcam preview immediately so the user
+    /// can position themselves before pressing Record.
+    private func handleWebcamToggle(_ enabled: Bool, rect: CGRect) {
+        if enabled {
+            guard webcam == nil else { return }
+            guard let cam = WebcamWindow(in: rect) else {
+                ToastController.shared.show(
+                    message: "No camera found",
+                    icon: "video.slash.fill",
+                    tint: .systemOrange
+                )
+                return
+            }
+            cam.show()
+            webcam = cam
+        } else {
+            webcam?.dismiss()
+            webcam = nil
+        }
     }
 
     private func tearDownOptionsPanel() {
@@ -127,6 +155,18 @@ final class RecordingController {
             return
         }
 
+        // Webcam permission is handled at toggle time in the UI. Defensive fallback
+        // here in case access was revoked between toggling and pressing Record.
+        var resolved = options
+        if resolved.recordWebcam,
+           WebcamWindow.authorizationStatus() != .authorized {
+            resolved.recordWebcam = false
+        }
+
+        startRecorder(rect: rect, screen: screen, options: resolved)
+    }
+
+    private func startRecorder(rect: CGRect, screen: NSScreen, options: RecordingOptions) {
         let url = Self.temporaryMP4URL()
         let recorder = ScreenRecorder(outputURL: url)
         self.recorder = recorder
@@ -138,12 +178,21 @@ final class RecordingController {
 
         // Click-highlight overlay — created here so ScreenCaptureKit can include
         // its window as an exception to our app exclusion filter.
-        var clickWindowID: CGWindowID? = nil
+        var exceptingIDs: [CGWindowID] = []
         if options.highlightClicks {
             let overlay = ClickHighlightWindow()
             overlay.show()
-            clickWindowID = overlay.cgWindowID
+            if let id = overlay.cgWindowID { exceptingIDs.append(id) }
             clickHighlight = overlay
+        }
+
+        // Webcam was created at toggle time; reuse its existing window so the
+        // preview the user has been seeing is exactly what gets baked into the
+        // recording. Freeze interaction so accidental clicks during recording
+        // don't move/resize the circle.
+        if options.recordWebcam, let webcam = webcam, let id = webcam.cgWindowID {
+            webcam.setInteractive(false)
+            exceptingIDs.append(id)
         }
 
         // Extract Sendable primitives from NSScreen so we don't have to send the
@@ -152,6 +201,7 @@ final class RecordingController {
         let showsCursor = options.showCursor
         let captureSystem = options.captureSystemAudio
         let captureMic = options.captureMicrophone
+        let exceptions = exceptingIDs
 
         Task { [weak self] in
             do {
@@ -161,7 +211,7 @@ final class RecordingController {
                     showsCursor: showsCursor,
                     captureSystemAudio: captureSystem,
                     captureMicrophone: captureMic,
-                    exceptingWindowID: clickWindowID
+                    exceptingWindowIDs: exceptions
                 )
                 guard let self = self else { return }
                 self.isRecording = true
@@ -172,6 +222,8 @@ final class RecordingController {
                 self.recorder = nil
                 self.clickHighlight?.dismiss()
                 self.clickHighlight = nil
+                self.webcam?.dismiss()
+                self.webcam = nil
                 self.failRecording(error: error)
             }
         }
@@ -192,6 +244,8 @@ final class RecordingController {
             self.frameOverlay.dismiss()
             self.clickHighlight?.dismiss()
             self.clickHighlight = nil
+            self.webcam?.dismiss()
+            self.webcam = nil
             self.currentRect = nil
             self.handleFinished(tempURL: maybeURL, duration: duration, dimensions: dimensions)
         }
@@ -203,6 +257,8 @@ final class RecordingController {
         frameOverlay.dismiss()
         clickHighlight?.dismiss()
         clickHighlight = nil
+        webcam?.dismiss()
+        webcam = nil
         currentRect = nil
         recorder = nil
         ToastController.shared.show(

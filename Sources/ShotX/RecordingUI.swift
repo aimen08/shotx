@@ -1,3 +1,4 @@
+import AVFoundation
 import Cocoa
 import SwiftUI
 
@@ -6,6 +7,7 @@ struct RecordingOptions {
     var highlightClicks: Bool = false
     var captureSystemAudio: Bool = false
     var captureMicrophone: Bool = false
+    var recordWebcam: Bool = false
 }
 
 struct RecordingOptionsView: View {
@@ -13,11 +15,13 @@ struct RecordingOptionsView: View {
     let onRecordVideo: (RecordingOptions) -> Void
     let onRecordGIF: (RecordingOptions) -> Void
     let onCancel: () -> Void
+    let onWebcamToggle: (Bool) -> Void
 
     @State private var showCursor = true
     @State private var highlightClicks = false
     @State private var captureSystemAudio = false
     @State private var captureMicrophone = false
+    @State private var recordWebcam = false
     @State private var appeared = false
 
     private var currentOptions: RecordingOptions {
@@ -25,7 +29,8 @@ struct RecordingOptionsView: View {
             showCursor: showCursor,
             highlightClicks: highlightClicks,
             captureSystemAudio: captureSystemAudio,
-            captureMicrophone: captureMicrophone
+            captureMicrophone: captureMicrophone,
+            recordWebcam: recordWebcam
         )
     }
 
@@ -44,6 +49,57 @@ struct RecordingOptionsView: View {
                 appeared = true
             }
         }
+        .onChange(of: recordWebcam) { newValue in
+            if newValue {
+                Task { @MainActor in
+                    await ensureCameraAccessAndPreview()
+                }
+            } else {
+                onWebcamToggle(false)
+            }
+        }
+    }
+
+    /// On toggle-on: verify access (prompting on first use), then ask the
+    /// controller to spawn the live webcam preview. On denial, flip the
+    /// toggle back off and offer to jump to System Settings.
+    ///
+    /// `@MainActor` is required because `AVCaptureDevice.requestAccess`
+    /// resumes on whichever cooperative thread it likes, and the subsequent
+    /// `recordWebcam = false` write is into SwiftUI `@State`.
+    @MainActor
+    private func ensureCameraAccessAndPreview() async {
+        switch AVCaptureDevice.authorizationStatus(for: .video) {
+        case .authorized:
+            onWebcamToggle(true)
+        case .notDetermined:
+            let granted = await AVCaptureDevice.requestAccess(for: .video)
+            if granted {
+                onWebcamToggle(true)
+            } else {
+                recordWebcam = false
+                Self.showCameraDeniedToast(openSettings: false)
+            }
+        case .denied, .restricted:
+            recordWebcam = false
+            Self.showCameraDeniedToast(openSettings: true)
+        @unknown default:
+            recordWebcam = false
+        }
+    }
+
+    private static func showCameraDeniedToast(openSettings: Bool) {
+        ToastController.shared.show(
+            message: openSettings
+                ? "Camera access denied — opening System Settings"
+                : "Camera access denied",
+            icon: "video.slash.fill",
+            tint: .systemOrange
+        )
+        if openSettings,
+           let url = URL(string: "x-apple.systempreferences:com.apple.preference.security?Privacy_Camera") {
+            NSWorkspace.shared.open(url)
+        }
     }
 
     private var settingsStrip: some View {
@@ -55,7 +111,7 @@ struct RecordingOptionsView: View {
                 CompactToggle(icon: "speaker.wave.2", binding: $captureSystemAudio, enabled: true, tooltip: "System audio")
                 CompactToggle(icon: "cursorarrow", binding: $showCursor, enabled: true, tooltip: "Show cursor")
                 CompactToggle(icon: "cursorarrow.click", binding: $highlightClicks, enabled: true, tooltip: "Highlight clicks")
-                CompactToggle(icon: "camera", binding: .constant(false), enabled: false, tooltip: "Camera — coming soon")
+                CompactToggle(icon: "camera", binding: $recordWebcam, enabled: true, tooltip: "Webcam (bottom-left of region)")
                 CompactToggle(icon: "keyboard", binding: .constant(false), enabled: false, tooltip: "Keystrokes — coming soon")
             }
         }
