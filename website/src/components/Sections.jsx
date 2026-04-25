@@ -24,6 +24,7 @@ export const SectionDivider = ({ height = 120, from = 'transparent', to = 'trans
 const FEATURES = [
   { icon: 'area',      title: 'Screenshots, every shape',   text: 'Area, fullscreen, window, and previous-area capture — all from a global shortcut or the menu bar.' },
   { icon: 'record',    title: 'Screen recording',           text: 'MP4 or GIF export, microphone and system audio, with mouse-click highlights for demos.' },
+  { icon: 'camera',    title: 'Webcam overlay',             text: 'Circular self-view in the recording — drag to position, drag the corner to resize, baked into the final video.' },
   { icon: 'arrow',     title: 'Annotate in place',          text: 'Arrows, rectangles, text, and numbered callouts — copy straight to clipboard when you\'re done.' },
   { icon: 'textscan',  title: 'Extract text (OCR)',         text: 'Drag a region, Apple Vision recognizes the text on-device, and it lands on your clipboard.' },
   { icon: 'history',   title: 'Searchable history',         text: 'Every capture kept locally, with thumbnails and quick re-open. Nothing leaves your Mac.' },
