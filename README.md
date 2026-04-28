@@ -55,6 +55,15 @@ All four global shortcuts are configurable in **Settings → Shortcuts**.
 
 ## Install
 
+### Homebrew
+
+```bash
+brew tap aimen08/shotx https://github.com/aimen08/homebrew-shotx
+brew install --cask shotx
+```
+
+### Manual
+
 1. Download the latest **`ShotX-x.y.dmg`** from [Releases](https://github.com/aimen08/shotx/releases/latest)
 2. Drag **ShotX.app** to **Applications**
 3. **Right-click → Open** on first launch (Gatekeeper warning, the app is ad-hoc signed)
