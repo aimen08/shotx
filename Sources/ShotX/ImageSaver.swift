@@ -22,7 +22,18 @@ enum ImageSaver {
     static func copyToClipboard(_ image: NSImage) {
         let pb = NSPasteboard.general
         pb.clearContents()
-        pb.writeObjects([image])
+        // Expose both PNG and TIFF. Writing the NSImage alone only provides
+        // TIFF, which many chat apps, browsers, and Electron tools silently
+        // reject when pasting — they look for PNG. Offering both makes the
+        // screenshot pasteable everywhere.
+        let item = NSPasteboardItem()
+        if let png = pngData(from: image) {
+            item.setData(png, forType: .png)
+        }
+        if let tiff = image.tiffRepresentation {
+            item.setData(tiff, forType: .tiff)
+        }
+        pb.writeObjects([item])
     }
 
     static func copyTextToClipboard(_ text: String) {
