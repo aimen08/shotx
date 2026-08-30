@@ -20,6 +20,10 @@ final class OverlayWindow: NSWindow {
         )
         setFrame(screen.frame, display: false)
 
+        // Paired with the explicit close() in OverlayController: programmatic
+        // NSWindows default to releasing themselves on close, which is an
+        // over-release under ARC.
+        isReleasedWhenClosed = false
         isOpaque = false
         backgroundColor = .clear
         hasShadow = false

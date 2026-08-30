@@ -56,11 +56,19 @@ final class HistoryStore: ObservableObject {
     private let historyDir: URL
     private let indexURL: URL
 
-    /// In-memory cache of downsampled thumbnails, keyed by entry ID. Auto-evicts
-    /// on memory pressure via NSCache's built-in behaviour.
+    private static let thumbnailByteBudget = 64 * 1024 * 1024
+
+    /// In-memory cache of downsampled thumbnails, keyed by entry ID.
+    ///
+    /// `countLimit` alone doesn't bound it: NSCache can't weigh an NSImage it
+    /// knows nothing about, so a full history of Retina thumbnails would sit on
+    /// ~140 MB until the system reported memory pressure. Every insert carries
+    /// its decoded pixel cost against an explicit byte budget.
+
     private let thumbnailCache: NSCache<NSString, NSImage> = {
         let c = NSCache<NSString, NSImage>()
-        c.countLimit = 200
+        c.countLimit = 120
+        c.totalCostLimit = HistoryStore.thumbnailByteBudget
         return c
     }()
 
@@ -88,11 +96,18 @@ final class HistoryStore: ObservableObject {
     @discardableResult
     func add(_ image: NSImage) -> CaptureEntry? {
         guard let png = ImageSaver.pngData(from: image) else { return nil }
+        return add(png: png, size: image.size)
+    }
+
+    /// Stores PNG bytes that were already encoded elsewhere, so the capture flow
+    /// doesn't rasterize the same screenshot twice.
+    @discardableResult
+    func add(png: Data, size: CGSize) -> CaptureEntry? {
         let entry = CaptureEntry(
             filename: "\(UUID().uuidString).png",
             createdAt: Date(),
-            width: image.size.width,
-            height: image.size.height,
+            width: size.width,
+            height: size.height,
             kind: .image
         )
         let url = historyDir.appendingPathComponent(entry.filename)
@@ -196,7 +211,7 @@ final class HistoryStore: ObservableObject {
         }
 
         if let image = image {
-            thumbnailCache.setObject(image, forKey: key)
+            thumbnailCache.setObject(image, forKey: key, cost: HistoryStore.byteCost(of: image))
         }
         return image
     }
@@ -211,6 +226,12 @@ final class HistoryStore: ObservableObject {
         guard let cg = CGImageSourceCreateThumbnailAtIndex(src, 0, opts as CFDictionary) else { return nil }
         let pointSize = NSSize(width: CGFloat(cg.width) / 2, height: CGFloat(cg.height) / 2)
         return NSImage(cgImage: cg, size: pointSize)
+    }
+
+    /// Decoded size in bytes, used as the NSCache eviction cost.
+    private static func byteCost(of image: NSImage) -> Int {
+        guard let rep = image.representations.first else { return 1 }
+        return max(1, rep.pixelsWide * rep.pixelsHigh * 4)
     }
 
     private static func downsampledVideoFrame(at url: URL, maxDim: CGFloat) -> NSImage? {

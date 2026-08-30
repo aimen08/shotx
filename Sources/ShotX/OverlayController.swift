@@ -27,6 +27,9 @@ final class OverlayController {
             )
             windows.append(window)
             window.orderFrontRegardless()
+            // Registered after ordering in — that's when AppKit assigns the
+            // window number the capture filter needs.
+            CaptureExclusions.register(window)
         }
 
         NSApp.activate(ignoringOtherApps: true)
@@ -36,13 +39,31 @@ final class OverlayController {
     private func finish(with rectInScreen: CGRect?, screen: NSScreen?) {
         guard !finished else { return }
         finished = true
-        closeWindows()
 
         guard let rect = rectInScreen, let screen = screen else {
+            closeWindows()
             completion?(nil, nil, nil)
             return
         }
 
+        // Capture straight through the overlay. `CaptureExclusions` keeps our own
+        // windows out of the composite, so there's nothing to hide first and no
+        // settle delay to wait out — this used to order the overlay away and
+        // then sleep 120 ms before grabbing pixels.
+        if let image = ScreenCapture.capture(
+            rectInScreenCoords: rect,
+            screen: screen,
+            requiresChromeExclusion: true
+        ) {
+            closeWindows()
+            completion?(image, rect, screen)
+            return
+        }
+
+        // Excluding our windows failed, so a capture right now would contain the
+        // dimming layer. Take the overlay down and give the window server a
+        // moment, the way this always used to work.
+        closeWindows()
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.12) { [weak self] in
             let image = ScreenCapture.capture(rectInScreenCoords: rect, screen: screen)
             self?.completion?(image, rect, screen)
@@ -54,7 +75,13 @@ final class OverlayController {
             NSCursor.unhide()
             cursorHidden = false
         }
-        for w in windows { w.orderOut(nil) }
+        for w in windows {
+            CaptureExclusions.unregister(w)
+            w.contentView = nil
+            // `orderOut` alone leaves the window in AppKit's list holding on to
+            // its view tree; `close()` is what actually lets it go.
+            w.close()
+        }
         windows.removeAll()
     }
 

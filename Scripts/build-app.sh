@@ -18,7 +18,21 @@ MACOS="$CONTENTS/MacOS"
 RESOURCES="$CONTENTS/Resources"
 
 echo "→ Building release binary (universal: arm64 + x86_64)…"
-swift build -c release --arch arm64 --arch x86_64
+# Built one slice at a time and lipo'd together, rather than as a single
+# `swift build --arch arm64 --arch x86_64`. That combined form routes through
+# xcbuild, which only ships with the full Xcode install; per-arch builds and
+# lipo need nothing beyond the Command Line Tools.
+swift build -c release --arch arm64
+swift build -c release --arch x86_64
+ARM64_DIR=$(swift build -c release --arch arm64 --show-bin-path)
+X86_64_DIR=$(swift build -c release --arch x86_64 --show-bin-path)
+UNIVERSAL_DIR=".build/universal"
+mkdir -p "$UNIVERSAL_DIR"
+lipo -create \
+    "$ARM64_DIR/$APP_NAME" \
+    "$X86_64_DIR/$APP_NAME" \
+    -output "$UNIVERSAL_DIR/$APP_NAME"
+echo "  ✓ Universal binary: $(lipo -archs "$UNIVERSAL_DIR/$APP_NAME")"
 
 # Sparkle public key (used for verifying update signatures)
 SU_PUBLIC_KEY=""
@@ -40,6 +54,7 @@ mkdir -p "$MACOS" "$RESOURCES"
 # .build/apple/Products/Release; single-arch builds go to .build/release.
 BINARY_SRC=""
 for candidate in \
+    ".build/universal/$APP_NAME" \
     ".build/apple/Products/Release/$APP_NAME" \
     ".build/release/$APP_NAME"; do
     if [ -f "$candidate" ]; then

@@ -241,13 +241,18 @@ final class ScreenRecorder: NSObject, @unchecked Sendable {
 extension ScreenRecorder: SCStreamOutput, SCStreamDelegate {
     func stream(_ stream: SCStream, didOutputSampleBuffer sampleBuffer: CMSampleBuffer, of outputType: SCStreamOutputType) {
         guard CMSampleBufferDataIsReady(sampleBuffer) else { return }
-        switch outputType {
-        case .screen:
-            handleVideo(sampleBuffer)
-        case .audio:
-            handleSystemAudio(sampleBuffer)
-        @unknown default:
-            break
+        // Sample handling runs on a dispatch queue, which only drains its
+        // autorelease pool between work items. At 30 fps of full-resolution
+        // pixel buffers that is a lot of deferred deallocation.
+        autoreleasepool {
+            switch outputType {
+            case .screen:
+                handleVideo(sampleBuffer)
+            case .audio:
+                handleSystemAudio(sampleBuffer)
+            @unknown default:
+                break
+            }
         }
     }
 
@@ -301,11 +306,13 @@ extension ScreenRecorder: AVCaptureAudioDataOutputSampleBufferDelegate {
     func captureOutput(_ output: AVCaptureOutput,
                        didOutput sampleBuffer: CMSampleBuffer,
                        from connection: AVCaptureConnection) {
-        guard sessionStarted,
-              let input = micAudioInput,
-              input.isReadyForMoreMediaData,
-              assetWriter?.status == .writing
-        else { return }
-        input.append(sampleBuffer)
+        autoreleasepool {
+            guard sessionStarted,
+                  let input = micAudioInput,
+                  input.isReadyForMoreMediaData,
+                  assetWriter?.status == .writing
+            else { return }
+            input.append(sampleBuffer)
+        }
     }
 }

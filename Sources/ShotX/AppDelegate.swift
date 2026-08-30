@@ -10,7 +10,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
     private var ocrHotKeyManager: HotKeyManager!
     private var overlayController: OverlayController?
     private var popupController: PostCapturePopupController?
-    private var annotationController: AnnotationWindowController?
+    private var annotationControllers: [AnnotationWindowController] = []
     private var mainWindowController: MainWindowController?
     private var countdownController: CountdownController?
     private var timerFrameOverlay: RecordingFrameOverlay?
@@ -154,7 +154,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
         let prev = menuItem(
             title: "Capture Previous Area",
             symbol: "arrow.clockwise",
-            action: #selector(capturePreviousArea)
+            action: #selector(capturePreviousAreaFromMenu)
         )
         prev.isEnabled = LastCaptureStore.hasPrevious
         menu.addItem(prev)
@@ -162,7 +162,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
         menu.addItem(menuItem(
             title: "Capture Fullscreen",
             symbol: "display",
-            action: #selector(captureFullscreen),
+            action: #selector(captureFullscreenFromMenu),
             shortcut: ShortcutStore.shared.fullscreenShortcut
         ))
 
@@ -377,7 +377,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
 
     private func applyFullscreenShortcut(_ s: Shortcut) {
         fullscreenHotKeyManager.register(keyCode: s.keyCode, modifiers: s.modifiers) { [weak self] in
-            self?.captureFullscreen()
+            self?.captureFullscreen(settleDelay: 0)
         }
     }
 
@@ -404,13 +404,24 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
         }
     }
 
-    @objc private func captureFullscreen() {
+    /// The status menu's dismissal animation outlives the action that triggered
+    /// it by roughly this long. Menu windows belong to our process but never
+    /// pass through `CaptureExclusions`, so unlike our own panels they can't be
+    /// filtered out of the composite — a menu-invoked capture still has to wait
+    /// them out. Hotkey-invoked captures pass 0 and run synchronously.
+    private static let menuDismissSettle: TimeInterval = 0.15
+
+    @objc private func captureFullscreenFromMenu() {
+        captureFullscreen(settleDelay: Self.menuDismissSettle)
+    }
+
+    private func captureFullscreen(settleDelay: TimeInterval) {
         guard ensurePermissionOrPrompt() else { return }
         let mouseLoc = NSEvent.mouseLocation
         let screen = NSScreen.screens.first(where: { $0.frame.contains(mouseLoc) }) ?? NSScreen.main
         guard let screen = screen else { return }
 
-        DispatchQueue.main.asyncAfter(deadline: .now() + 0.2) { [weak self] in
+        after(settleDelay) { [weak self] in
             guard let self = self,
                   let image = ScreenCapture.capture(rectInScreenCoords: screen.frame, screen: screen)
             else { return }
@@ -419,17 +430,31 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
         }
     }
 
-    @objc private func capturePreviousArea() {
+    @objc private func capturePreviousAreaFromMenu() {
+        capturePreviousArea(settleDelay: Self.menuDismissSettle)
+    }
+
+    private func capturePreviousArea(settleDelay: TimeInterval) {
         guard ensurePermissionOrPrompt() else { return }
         guard let stored = LastCaptureStore.load() else {
             NSSound.beep()
             return
         }
-        DispatchQueue.main.asyncAfter(deadline: .now() + 0.15) { [weak self] in
+        after(settleDelay) { [weak self] in
             guard let self = self,
                   let image = ScreenCapture.capture(rectInScreenCoords: stored.rect, screen: stored.screen)
             else { return }
             self.handleCapturedImage(image)
+        }
+    }
+
+    /// Runs on the next main-queue turn when `delay` is zero, so the caller's
+    /// event finishes unwinding before we grab pixels.
+    private func after(_ delay: TimeInterval, _ work: @escaping () -> Void) {
+        if delay <= 0 {
+            DispatchQueue.main.async(execute: work)
+        } else {
+            DispatchQueue.main.asyncAfter(deadline: .now() + delay, execute: work)
         }
     }
 
@@ -462,16 +487,15 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
                 onFinish: { [weak self] in
                     guard let self = self else { return }
                     self.countdownController = nil
-                    // Dismiss frame overlay and panel before snapping; wait a tick for
-                    // the screen to redraw without our chrome before the capture.
+                    // Take the viewfinder down before snapping. No settle delay
+                    // needed: retired chrome stays filtered out of the composite
+                    // for a while after close(), so a capture landing before the
+                    // window server catches up still can't see it.
                     self.timerFrameOverlay?.dismiss()
                     self.timerFrameOverlay = nil
-                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.2) { [weak self] in
-                        guard let self = self else { return }
-                        guard let image = ScreenCapture.capture(rectInScreenCoords: rect, screen: screen) else { return }
-                        LastCaptureStore.save(rect: rect, screen: screen)
-                        self.handleCapturedImage(image)
-                    }
+                    guard let image = ScreenCapture.capture(rectInScreenCoords: rect, screen: screen) else { return }
+                    LastCaptureStore.save(rect: rect, screen: screen)
+                    self.handleCapturedImage(image)
                 }
             )
         }
@@ -551,8 +575,10 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
             switch action {
             case .area:       self.captureNow()
             case .window:     self.captureWindow()
-            case .fullscreen: self.captureFullscreen()
-            case .previous:   self.capturePreviousArea()
+            // The All-In-One panel is registered chrome, so its dismissal is
+            // filtered out of the composite — no settle delay needed.
+            case .fullscreen: self.captureFullscreen(settleDelay: 0)
+            case .previous:   self.capturePreviousArea(settleDelay: 0)
             case .record:     self.recordScreen()
             case .timer:
                 let item = NSMenuItem()
@@ -596,27 +622,52 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
 
     private func handleCapturedImage(_ image: NSImage) {
         SoundEffect.shared.playShutter()
-        let entry = HistoryStore.shared.add(image)
-        let fileURL = entry.map { HistoryStore.shared.fileURL(for: $0) }
-        ImageSaver.copyToClipboard(image)
-        showPostCapturePopup(for: image, fileURL: fileURL)
+
+        // Show the result first — the popup only needs the NSImage. Encoding a
+        // full-resolution capture to PNG takes long enough to be felt as a hang
+        // if it happens before anything appears on screen.
+        let popup = showPostCapturePopup(for: image)
+
+        // One rasterization, off the main thread, shared by the clipboard and
+        // the history file. The old path built a full uncompressed TIFF three
+        // times over, on the main thread, before the popup was drawn.
+        //
+        // The popup is captured directly rather than read back off `self`: a
+        // second capture taken while this one is still encoding would otherwise
+        // hand its predecessor's file URL to the newer popup.
+        ImageSaver.encodeInBackground(image) { [weak popup] encoded in
+            guard let encoded = encoded else { return }
+            ImageSaver.copyToClipboard(encoded)
+            let entry = HistoryStore.shared.add(png: encoded.png, size: image.size)
+            let fileURL = entry.map { HistoryStore.shared.fileURL(for: $0) }
+            MainActor.assumeIsolated {
+                popup?.attach(fileURL: fileURL, pngData: encoded.png)
+            }
+        }
     }
 
-    private func showPostCapturePopup(for image: NSImage, fileURL: URL?) {
+    @discardableResult
+    private func showPostCapturePopup(for image: NSImage) -> PostCapturePopupController {
         MainActor.assumeIsolated {
             popupController?.dismiss()
             let controller = PostCapturePopupController()
             popupController = controller
-            controller.show(image: image, fileURL: fileURL, onEdit: { [weak self] in
+            controller.show(image: image, onEdit: { [weak self] in
                 self?.openAnnotator(with: image)
             })
+            return controller
         }
     }
 
     func openAnnotator(with image: NSImage) {
-        annotationController = AnnotationWindowController()
-        annotationController?.open(image: image) { [weak self] in
-            self?.annotationController = nil
+        // Kept in a list rather than a single slot: opening a second annotator
+        // used to drop the first controller on the floor while its window was
+        // still on screen, and the orphan's close callback would then clear the
+        // reference to the live one.
+        let controller = AnnotationWindowController()
+        annotationControllers.append(controller)
+        controller.open(image: image) { [weak self, weak controller] in
+            self?.annotationControllers.removeAll { $0 === controller }
         }
     }
 

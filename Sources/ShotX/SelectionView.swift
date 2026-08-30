@@ -38,16 +38,94 @@ final class SelectionView: NSView {
         needsDisplay = true
     }
 
+    // MARK: - Redraw bookkeeping
+    //
+    // This view is the size of a whole display, so `needsDisplay = true` on every
+    // mouse event repaints the full dim layer, the selection and the crosshair —
+    // several megapixels of drawing per mouse move, which is what made dragging a
+    // selection feel heavy on large screens. Every event below invalidates only
+    // the pixels that actually changed.
+
+    /// Bounding box of the crosshair including its arms and drop shadow.
+    private func crosshairDirtyRect(at p: NSPoint) -> NSRect {
+        let reach: CGFloat = 11 + 5 // arm length + shadow blur + line width
+        return NSRect(x: p.x - reach, y: p.y - reach, width: reach * 2, height: reach * 2)
+    }
+
+    private func moveCrosshair(to p: NSPoint) {
+        if let old = mousePosition {
+            if old == p { return }
+            setNeedsDisplay(crosshairDirtyRect(at: old))
+        }
+        mousePosition = p
+        setNeedsDisplay(crosshairDirtyRect(at: p))
+    }
+
+    /// Invalidates the bands between the old and new selection: the shared
+    /// interior is identical in both frames, so only the edges that moved (and
+    /// the dimension label, which rides along) need repainting.
+    private func invalidateSelection(from old: NSRect, to new: NSRect) {
+        let outset: CGFloat = 2 // border stroke + antialiasing
+
+        // The white border of the old rect can sit well inside the union of the
+        // two, where the band arithmetic below wouldn't touch it — repaint both
+        // outlines explicitly or the previous frame's edges stay on screen.
+        if !old.isEmpty {
+            invalidateEdges(of: old, outset: outset)
+            setNeedsDisplay(dimensionsDirtyRect(for: old))
+        }
+        if !new.isEmpty {
+            invalidateEdges(of: new, outset: outset)
+            setNeedsDisplay(dimensionsDirtyRect(for: new))
+        }
+
+        let a = old.isEmpty ? NSRect.zero : old.insetBy(dx: -outset, dy: -outset)
+        let b = new.isEmpty ? NSRect.zero : new.insetBy(dx: -outset, dy: -outset)
+
+        guard !a.isEmpty, !b.isEmpty, a.intersects(b) else {
+            if !a.isEmpty { setNeedsDisplay(a) }
+            if !b.isEmpty { setNeedsDisplay(b) }
+            return
+        }
+
+        let union = a.union(b)
+        let inter = a.intersection(b)
+        setNeedsDisplay(NSRect(x: union.minX, y: union.minY,
+                               width: union.width, height: inter.minY - union.minY))
+        setNeedsDisplay(NSRect(x: union.minX, y: inter.maxY,
+                               width: union.width, height: union.maxY - inter.maxY))
+        setNeedsDisplay(NSRect(x: union.minX, y: inter.minY,
+                               width: inter.minX - union.minX, height: inter.height))
+        setNeedsDisplay(NSRect(x: inter.maxX, y: inter.minY,
+                               width: union.maxX - inter.maxX, height: inter.height))
+    }
+
+    /// The four thin strips the selection outline is drawn into.
+    private func invalidateEdges(of rect: NSRect, outset: CGFloat) {
+        let thickness = outset * 2
+        let r = rect.insetBy(dx: -outset, dy: -outset)
+        setNeedsDisplay(NSRect(x: r.minX, y: r.minY, width: r.width, height: thickness))
+        setNeedsDisplay(NSRect(x: r.minX, y: r.maxY - thickness, width: r.width, height: thickness))
+        setNeedsDisplay(NSRect(x: r.minX, y: r.minY, width: thickness, height: r.height))
+        setNeedsDisplay(NSRect(x: r.maxX - thickness, y: r.minY, width: thickness, height: r.height))
+    }
+
+    /// Generous box around wherever the "W × H" label can land for a selection.
+    private func dimensionsDirtyRect(for rect: NSRect) -> NSRect {
+        let w: CGFloat = 140
+        let h: CGFloat = 28
+        return NSRect(x: rect.maxX - w, y: rect.minY - h - 4, width: w, height: rect.height + h * 2 + 8)
+            .intersection(bounds)
+    }
+
     // MARK: - Mouse tracking (for crosshair position)
 
     override func mouseMoved(with event: NSEvent) {
-        mousePosition = convert(event.locationInWindow, from: nil)
-        needsDisplay = true
+        moveCrosshair(to: convert(event.locationInWindow, from: nil))
     }
 
     override func mouseEntered(with event: NSEvent) {
-        mousePosition = convert(event.locationInWindow, from: nil)
-        needsDisplay = true
+        moveCrosshair(to: convert(event.locationInWindow, from: nil))
     }
 
     // MARK: - Selection
@@ -55,22 +133,24 @@ final class SelectionView: NSView {
     override func mouseDown(with event: NSEvent) {
         let p = convert(event.locationInWindow, from: nil)
         startPoint = p
-        mousePosition = p
+        let previous = currentRect
         currentRect = .zero
-        needsDisplay = true
+        invalidateSelection(from: previous, to: .zero)
+        moveCrosshair(to: p)
     }
 
     override func mouseDragged(with event: NSEvent) {
         guard let start = startPoint else { return }
         let p = convert(event.locationInWindow, from: nil)
-        mousePosition = p
+        let previous = currentRect
         currentRect = NSRect(
             x: min(start.x, p.x),
             y: min(start.y, p.y),
             width: abs(p.x - start.x),
             height: abs(p.y - start.y)
         )
-        needsDisplay = true
+        invalidateSelection(from: previous, to: currentRect)
+        moveCrosshair(to: p)
     }
 
     override func mouseUp(with event: NSEvent) {

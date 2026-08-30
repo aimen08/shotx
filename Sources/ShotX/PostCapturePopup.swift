@@ -5,6 +5,11 @@ import SwiftUI
 @MainActor
 final class PostCapturePopupState: ObservableObject {
     @Published var minimized = false
+    /// Filled in once the capture has been encoded and written to history —
+    /// the popup is shown before that finishes, so drag-out and "Reveal in
+    /// Finder" pick these up a moment later.
+    @Published var fileURL: URL?
+    var pngData: Data?
 }
 
 @MainActor
@@ -19,17 +24,30 @@ final class PostCapturePopupController {
     private static let autoDismissAfter: TimeInterval = 6.0
     private static let edgeMargin: CGFloat = 20
 
-    func show(image: NSImage, fileURL: URL?, onEdit: @escaping () -> Void) {
+    /// Attaches the encoded bytes and history location once they're ready.
+    func attach(fileURL: URL?, pngData: Data?) {
+        state.pngData = pngData
+        state.fileURL = fileURL
+    }
+
+    func show(image: NSImage, onEdit: @escaping () -> Void) {
         // Reset state for fresh popup
         state.minimized = false
+        state.fileURL = nil
+        state.pngData = nil
         cancellables.removeAll()
 
         let view = PostCapturePopupView(
             image: image,
-            fileURL: fileURL,
             state: state,
             onSave: { [weak self] in
-                ImageSaver.saveToDesktop(image)
+                // Reuse the bytes the capture flow already encoded when they've
+                // landed; only fall back to re-encoding if the user is faster.
+                if let png = self?.state.pngData {
+                    ImageSaver.saveToDesktop(pngData: png)
+                } else {
+                    ImageSaver.saveToDesktop(image)
+                }
                 self?.dismiss()
             },
             onEdit: { [weak self] in
@@ -45,7 +63,7 @@ final class PostCapturePopupController {
                 self?.dismiss()
             },
             onReveal: { [weak self] in
-                if let url = fileURL {
+                if let url = self?.state.fileURL {
                     NSWorkspace.shared.activateFileViewerSelecting([url])
                 }
                 self?.dismiss()
@@ -77,6 +95,7 @@ final class PostCapturePopupController {
         panel.contentViewController = hosting
         panel.collectionBehavior = [.canJoinAllSpaces, .transient, .fullScreenAuxiliary]
         panel.becomesKeyOnlyIfNeeded = true
+        panel.isReleasedWhenClosed = false
 
         if let screen = NSScreen.main {
             let frame = NSRect(
@@ -88,6 +107,7 @@ final class PostCapturePopupController {
             panel.setFrame(frame, display: true)
         }
         panel.orderFrontRegardless()
+        CaptureExclusions.register(panel)
         self.panel = panel
 
         // Resize the panel when the popup minimizes / expands
@@ -120,8 +140,16 @@ final class PostCapturePopupController {
     func dismiss() {
         cancelAutoDismiss()
         cancellables.removeAll()
-        panel?.orderOut(nil)
+        // `orderOut` leaves the panel in AppKit's window list, still holding its
+        // hosting controller and, through the action closures, the full-
+        // resolution capture. Closing it is what actually releases them.
+        if let panel = panel {
+            CaptureExclusions.unregister(panel)
+            panel.contentViewController = nil
+            panel.close()
+        }
         panel = nil
+        state.pngData = nil
     }
 
     private func scheduleAutoDismiss() {
@@ -139,7 +167,6 @@ final class PostCapturePopupController {
 
 struct PostCapturePopupView: View {
     let image: NSImage
-    let fileURL: URL?
     @ObservedObject var state: PostCapturePopupState
     let onSave: () -> Void
     let onEdit: () -> Void
@@ -231,15 +258,14 @@ struct PostCapturePopupView: View {
     }
 
     private func exportProvider() -> NSItemProvider {
-        if let url = fileURL, FileManager.default.fileExists(atPath: url.path),
+        if let url = state.fileURL, FileManager.default.fileExists(atPath: url.path),
            let provider = NSItemProvider(contentsOf: url) {
             return provider
         }
-        // Fallback: register PNG data directly
+        // Fallback: register PNG data directly, reusing the encoded bytes if the
+        // capture flow has produced them yet.
         let provider = NSItemProvider()
-        if let tiff = image.tiffRepresentation,
-           let bitmap = NSBitmapImageRep(data: tiff),
-           let png = bitmap.representation(using: .png, properties: [:]) {
+        if let png = state.pngData ?? ImageSaver.pngData(from: image) {
             provider.registerDataRepresentation(forTypeIdentifier: "public.png", visibility: .all) { completion in
                 completion(png, nil)
                 return nil

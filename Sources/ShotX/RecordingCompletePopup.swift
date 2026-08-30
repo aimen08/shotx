@@ -95,6 +95,7 @@ final class RecordingCompletePopupController {
         panel.contentViewController = hosting
         panel.collectionBehavior = [.canJoinAllSpaces, .transient, .fullScreenAuxiliary]
         panel.becomesKeyOnlyIfNeeded = true
+        panel.isReleasedWhenClosed = false
 
         if let screen = NSScreen.main {
             let frame = NSRect(
@@ -106,6 +107,7 @@ final class RecordingCompletePopupController {
             panel.setFrame(frame, display: true)
         }
         panel.orderFrontRegardless()
+        CaptureExclusions.register(panel)
         self.panel = panel
 
         // Resize the panel when the popup minimizes / expands
@@ -138,8 +140,7 @@ final class RecordingCompletePopupController {
     func dismiss() {
         cancelAutoDismiss()
         cancellables.removeAll()
-        panel?.orderOut(nil)
-        panel = nil
+        closePanel(&panel)
     }
 
     private func scheduleAutoDismiss() {

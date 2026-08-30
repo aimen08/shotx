@@ -40,10 +40,12 @@ final class WindowCaptureController {
         window.ignoresMouseEvents = false
         window.isMovable = false
         window.collectionBehavior = [.canJoinAllSpaces, .fullScreenAuxiliary, .stationary]
+        window.isReleasedWhenClosed = false
         window.setFrame(screen.frame, display: false)
         window.contentView = view
         window.makeKeyAndOrderFront(nil)
         window.makeFirstResponder(view)
+        CaptureExclusions.register(window)
         self.window = window
 
         NSCursor.pointingHand.push()
@@ -52,20 +54,19 @@ final class WindowCaptureController {
 
     private func capture(window w: CapturableWindow) {
         tearDownOverlay()
-        DispatchQueue.main.asyncAfter(deadline: .now() + 0.15) { [weak self] in
-            guard let cg = CGWindowListCreateImage(
-                .null,
-                .optionIncludingWindow,
-                w.id,
-                [.bestResolution]
-            ) else {
-                self?.completion?(nil)
-                return
-            }
-            let size = NSSize(width: cg.width, height: cg.height)
-            let image = NSImage(cgImage: cg, size: size)
-            self?.completion?(image)
+        // No settle delay needed: `.optionIncludingWindow` composites that one
+        // window's backing store, so our picker overlay can't appear in it.
+        guard let cg = CGWindowListCreateImage(
+            .null,
+            .optionIncludingWindow,
+            w.id,
+            [.bestResolution]
+        ) else {
+            completion?(nil)
+            return
         }
+        let size = NSSize(width: cg.width, height: cg.height)
+        completion?(NSImage(cgImage: cg, size: size))
     }
 
     private func finish(with image: NSImage?) {
@@ -78,7 +79,11 @@ final class WindowCaptureController {
             NSCursor.pop()
             cursorPushed = false
         }
-        window?.orderOut(nil)
+        if let w = window {
+            CaptureExclusions.unregister(w)
+            w.contentView = nil
+            w.close()
+        }
         window = nil
         view = nil
     }

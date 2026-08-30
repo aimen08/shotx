@@ -26,6 +26,7 @@ final class ClickHighlightWindow {
         w.level = .screenSaver
         w.ignoresMouseEvents = true
         w.collectionBehavior = [.canJoinAllSpaces, .fullScreenAuxiliary, .stationary]
+        w.isReleasedWhenClosed = false
 
         let v = ClickHighlightView(frame: NSRect(origin: .zero, size: screen.frame.size))
         w.contentView = v
@@ -43,7 +44,8 @@ final class ClickHighlightWindow {
     func dismiss() {
         if let m = eventMonitor { NSEvent.removeMonitor(m) }
         eventMonitor = nil
-        window?.orderOut(nil)
+        window?.contentView = nil
+        window?.close()
         window = nil
         view = nil
     }

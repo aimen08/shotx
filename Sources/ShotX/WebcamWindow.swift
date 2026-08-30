@@ -21,6 +21,7 @@ final class WebcamWindow {
     private let imageView: NSImageView
     private let resizeHandle: ResizeHandleView
     private let session: AVCaptureSession
+    private let output: AVCaptureVideoDataOutput
     private let frameDelegate: WebcamFrameDelegate
     private let bufferQueue = DispatchQueue(label: "shotx.webcam.frames", qos: .userInteractive)
 
@@ -55,6 +56,7 @@ final class WebcamWindow {
         session.addOutput(output)
         session.commitConfiguration()
         self.session = session
+        self.output = output
 
         let initialDiameter = WebcamWindow.initialDiameter(for: rect)
         let frame = NSRect(
@@ -76,6 +78,7 @@ final class WebcamWindow {
         panel.level = .screenSaver
         panel.isMovableByWindowBackground = true
         panel.collectionBehavior = [.canJoinAllSpaces, .fullScreenAuxiliary]
+        panel.isReleasedWhenClosed = false
         self.panel = panel
 
         let container = NSView(frame: NSRect(origin: .zero, size: frame.size))
@@ -128,11 +131,15 @@ final class WebcamWindow {
     }
 
     func dismiss() {
+        // Drop the delegate first so no frame is rendered into a view that's on
+        // its way out.
+        output.setSampleBufferDelegate(nil, queue: nil)
         let session = self.session
         DispatchQueue.global(qos: .userInitiated).async {
             session.stopRunning()
         }
-        panel.orderOut(nil)
+        panel.contentView = nil
+        panel.close()
     }
 
     /// Disable user interaction (drag/resize) once recording starts so the
@@ -238,8 +245,17 @@ private final class ResizeHandleView: NSView {
 /// a center square so the circle fills cleanly with no letterboxing, then
 /// hands the result to the NSImageView on the main queue.
 private final class WebcamFrameDelegate: NSObject, AVCaptureVideoDataOutputSampleBufferDelegate {
-    private let context = CIContext()
+    // Intermediates are useless to us — every frame is a fresh render and none
+    // is ever reused, so caching them just grows the context without bound.
+    private let context = CIContext(options: [.cacheIntermediates: false])
     private weak var target: NSImageView?
+
+    /// Set while a frame is on its way to the main queue. Camera frames arrive
+    /// at ~30 fps whether or not the main thread is keeping up; without this,
+    /// a busy main thread lets full-size frames pile up in the dispatch queue
+    /// with nothing to bound them.
+    private let lock = NSLock()
+    private var deliveryInFlight = false
 
     init(target: NSImageView) {
         self.target = target
@@ -250,22 +266,41 @@ private final class WebcamFrameDelegate: NSObject, AVCaptureVideoDataOutputSampl
         didOutput sampleBuffer: CMSampleBuffer,
         from connection: AVCaptureConnection
     ) {
-        guard let pixelBuffer = CMSampleBufferGetImageBuffer(sampleBuffer) else { return }
-        let oriented = CIImage(cvPixelBuffer: pixelBuffer).oriented(.upMirrored)
-        let extent = oriented.extent
-        let side = min(extent.width, extent.height)
-        let crop = CGRect(
-            x: extent.midX - side / 2,
-            y: extent.midY - side / 2,
-            width: side,
-            height: side
-        )
-        guard let cg = context.createCGImage(oriented, from: crop) else { return }
-        let nsImage = NSImage(cgImage: cg, size: NSSize(width: cg.width, height: cg.height))
+        lock.lock()
+        let busy = deliveryInFlight
+        if !busy { deliveryInFlight = true }
+        lock.unlock()
+        guard !busy else { return }
+
+        // A dispatch queue only drains its autorelease pool between work items;
+        // under a sustained frame rate the CoreImage and CoreVideo temporaries
+        // accumulate for as long as the camera is running.
+        let nsImage: NSImage? = autoreleasepool {
+            guard let pixelBuffer = CMSampleBufferGetImageBuffer(sampleBuffer) else { return nil }
+            let oriented = CIImage(cvPixelBuffer: pixelBuffer).oriented(.upMirrored)
+            let extent = oriented.extent
+            let side = min(extent.width, extent.height)
+            let crop = CGRect(
+                x: extent.midX - side / 2,
+                y: extent.midY - side / 2,
+                width: side,
+                height: side
+            )
+            guard let cg = context.createCGImage(oriented, from: crop) else { return nil }
+            return NSImage(cgImage: cg, size: NSSize(width: cg.width, height: cg.height))
+        }
+
+        guard let nsImage = nsImage else {
+            lock.lock(); deliveryInFlight = false; lock.unlock()
+            return
+        }
+
         DispatchQueue.main.async { [weak self] in
             MainActor.assumeIsolated {
                 self?.target?.image = nsImage
             }
+            guard let self = self else { return }
+            self.lock.lock(); self.deliveryInFlight = false; self.lock.unlock()
         }
     }
 }

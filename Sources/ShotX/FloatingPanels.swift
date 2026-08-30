@@ -1,6 +1,21 @@
 import Cocoa
 import SwiftUI
 
+/// Tears a transient panel down for real.
+///
+/// `orderOut` only takes a window off screen — AppKit keeps it in the
+/// application's window list, so the panel, its SwiftUI hosting controller and
+/// anything those closures captured stay alive for the life of the process.
+/// Closing it (with `isReleasedWhenClosed` off, so ARC stays in charge) is what
+/// actually releases them.
+func closePanel(_ panel: inout NSPanel?) {
+    guard let p = panel else { return }
+    CaptureExclusions.unregister(p)
+    p.contentViewController = nil
+    p.close()
+    panel = nil
+}
+
 // MARK: - Countdown
 
 final class CountdownController {
@@ -35,6 +50,7 @@ final class CountdownController {
         panel.hasShadow = false
         panel.contentViewController = hosting
         panel.collectionBehavior = [.canJoinAllSpaces, .transient, .fullScreenAuxiliary]
+        panel.isReleasedWhenClosed = false
 
         if let screen = NSScreen.main {
             let size = NSSize(width: 180, height: 180)
@@ -47,6 +63,7 @@ final class CountdownController {
             panel.setFrame(frame, display: true)
         }
         panel.orderFrontRegardless()
+        CaptureExclusions.register(panel)
         self.panel = panel
 
         // Use .common runloop mode so the timer keeps firing even when the user
@@ -80,8 +97,7 @@ final class CountdownController {
     private func cleanup() {
         timer?.invalidate()
         timer = nil
-        panel?.orderOut(nil)
-        panel = nil
+        closePanel(&panel)
     }
 }
 
@@ -158,6 +174,7 @@ final class ToastController {
         panel.hasShadow = false
         panel.contentViewController = hosting
         panel.collectionBehavior = [.canJoinAllSpaces, .transient, .fullScreenAuxiliary]
+        panel.isReleasedWhenClosed = false
 
         if let screen = NSScreen.main {
             let margin: CGFloat = 24
@@ -170,6 +187,7 @@ final class ToastController {
             panel.setFrame(frame, display: true)
         }
         panel.orderFrontRegardless()
+        CaptureExclusions.register(panel)
         self.panel = panel
 
         timer = Timer.scheduledTimer(withTimeInterval: duration, repeats: false) { [weak self] _ in
@@ -180,8 +198,7 @@ final class ToastController {
     func dismiss() {
         timer?.invalidate()
         timer = nil
-        panel?.orderOut(nil)
-        panel = nil
+        closePanel(&panel)
     }
 }
 

@@ -37,10 +37,12 @@ final class AllInOneController {
         panel.hasShadow = false
         panel.contentViewController = hosting
         panel.collectionBehavior = [.canJoinAllSpaces, .transient, .fullScreenAuxiliary]
+        panel.isReleasedWhenClosed = false
 
         let origin = Self.positionBottomCenter(size: size)
         panel.setFrame(NSRect(origin: origin, size: size), display: true)
         panel.orderFrontRegardless()
+        CaptureExclusions.register(panel)
         self.panel = panel
 
         clickOutsideMonitor = NSEvent.addGlobalMonitorForEvents(matching: [.leftMouseDown, .rightMouseDown]) { [weak self] _ in
@@ -53,8 +55,7 @@ final class AllInOneController {
             NSEvent.removeMonitor(monitor)
             clickOutsideMonitor = nil
         }
-        panel?.orderOut(nil)
-        panel = nil
+        closePanel(&panel)
     }
 
     private static func positionBottomCenter(size: NSSize) -> NSPoint {

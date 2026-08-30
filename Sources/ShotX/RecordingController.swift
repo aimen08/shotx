@@ -85,10 +85,12 @@ final class RecordingController {
         panel.hasShadow = false
         panel.contentViewController = hosting
         panel.collectionBehavior = [.canJoinAllSpaces, .transient, .fullScreenAuxiliary]
+        panel.isReleasedWhenClosed = false
 
         let origin = Self.positionBottomCenter(size: size, screen: screen)
         panel.setFrame(NSRect(origin: origin, size: size), display: true)
         panel.orderFrontRegardless()
+        CaptureExclusions.register(panel)
         optionsPanel = panel
 
         optionsOutsideMonitor = NSEvent.addGlobalMonitorForEvents(matching: [.leftMouseDown, .rightMouseDown]) { [weak self] _ in
@@ -139,8 +141,7 @@ final class RecordingController {
             NSEvent.removeMonitor(monitor)
             optionsOutsideMonitor = nil
         }
-        optionsPanel?.orderOut(nil)
-        optionsPanel = nil
+        closePanel(&optionsPanel)
     }
 
     // MARK: - Recording
@@ -347,6 +348,7 @@ final class RecordingController {
         panel.hasShadow = false
         panel.contentViewController = hosting
         panel.collectionBehavior = [.canJoinAllSpaces, .fullScreenAuxiliary]
+        panel.isReleasedWhenClosed = false
 
         if let screen = NSScreen.main {
             let vf = screen.visibleFrame
@@ -359,6 +361,7 @@ final class RecordingController {
             panel.setFrame(frame, display: true)
         }
         panel.orderFrontRegardless()
+        CaptureExclusions.register(panel)
         stopPanel = panel
 
         startDate = Date()
@@ -377,8 +380,7 @@ final class RecordingController {
         elapsedTimer?.invalidate()
         elapsedTimer = nil
         startDate = nil
-        stopPanel?.orderOut(nil)
-        stopPanel = nil
+        closePanel(&stopPanel)
     }
 
     // MARK: - Helpers

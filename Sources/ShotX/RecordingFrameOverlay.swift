@@ -18,11 +18,13 @@ final class RecordingFrameOverlay {
             win.level = .floating
             win.ignoresMouseEvents = true
             win.collectionBehavior = [.canJoinAllSpaces, .fullScreenAuxiliary, .stationary]
+            win.isReleasedWhenClosed = false
 
             let v = RecordingFrameView(frame: NSRect(origin: .zero, size: rect.size))
             win.contentView = v
             window = win
             view = v
+            CaptureExclusions.register(win)
         }
 
         window?.setFrame(rect, display: true)
@@ -38,7 +40,11 @@ final class RecordingFrameOverlay {
     }
 
     func dismiss() {
-        window?.orderOut(nil)
+        if let win = window {
+            CaptureExclusions.unregister(win)
+            win.contentView = nil
+            win.close()
+        }
         window = nil
         view = nil
     }

@@ -45,6 +45,7 @@ final class PinnedImageController {
         panel.hasShadow = false
         panel.isMovableByWindowBackground = true
         panel.collectionBehavior = [.canJoinAllSpaces, .fullScreenAuxiliary]
+        panel.isReleasedWhenClosed = false
 
         let view = PinnedImageView(
             image: image,
@@ -70,12 +71,18 @@ final class PinnedImageController {
     }
 
     private func close(panel: NSPanel) {
-        panel.orderOut(nil)
+        // Pinned captures hold a full-resolution NSImage; `orderOut` alone would
+        // keep every unpinned one alive for the rest of the session.
+        panel.contentViewController = nil
+        panel.close()
         panels.removeAll { $0 === panel }
     }
 
     func closeAll() {
-        for p in panels { p.orderOut(nil) }
+        for p in panels {
+            p.contentViewController = nil
+            p.close()
+        }
         panels.removeAll()
     }
 }
