@@ -1,6 +1,6 @@
 cask "shotx" do
-  version "1.9.8"
-  sha256 "0ef627f63b048fdfc76983e564df3987041b8b3ebdf0482b0d685f374617b32e"
+  version "1.9.9"
+  sha256 "590086071eeaa38248e452c439080040ef8f6a09ec42bbddab875305a471f338"
 
   url "https://github.com/aimen08/shotx/releases/download/v#{version}/ShotX-#{version}.dmg",
       verified: "github.com/aimen08/shotx/"
