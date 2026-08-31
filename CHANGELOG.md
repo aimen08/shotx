@@ -3,6 +3,12 @@
 All notable changes to this project are documented here.
 The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## 2026-08-31
+
+### Fixed
+- Escape cancels the window picker. Its overlay was a plain borderless `NSWindow`, and AppKit refuses key status to those by default, so the picker's Escape handler never saw a key press — the only way out of window capture was to click something.
+- Escape cancels a running self-timer, the way clicking the countdown already did. The countdown panel is non-activating and the user is usually working in another app while it runs, so the key press never arrives as an AppKit event; it's grabbed as a system-wide hot key for as long as the countdown is on screen, and released the moment it goes away.
+
 ## 2026-08-30
 
 ### Changed

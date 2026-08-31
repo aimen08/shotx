@@ -27,7 +27,7 @@ final class WindowCaptureController {
         view.frame = NSRect(origin: .zero, size: screen.frame.size)
         self.view = view
 
-        let window = NSWindow(
+        let window = WindowPickerWindow(
             contentRect: screen.frame,
             styleMask: [.borderless],
             backing: .buffered,
@@ -114,6 +114,14 @@ final class WindowCaptureController {
             )
         }
     }
+}
+
+/// A borderless `NSWindow` refuses key status by default, which would leave
+/// `WindowSelectionView`'s Escape handler dead — the picker would only ever see
+/// mouse events, and there'd be no way to back out without clicking.
+private final class WindowPickerWindow: NSWindow {
+    override var canBecomeKey: Bool { true }
+    override var canBecomeMain: Bool { true }
 }
 
 final class WindowSelectionView: NSView {

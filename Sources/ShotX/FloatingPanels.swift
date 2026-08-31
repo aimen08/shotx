@@ -1,3 +1,4 @@
+import Carbon.HIToolbox
 import Cocoa
 import SwiftUI
 
@@ -24,8 +25,20 @@ final class CountdownController {
     private var cancelled = false
     private var cancelHandler: (() -> Void)?
 
+    /// Escape cancels the pending capture. The countdown panel is a
+    /// non-activating panel and the user is usually working in another app
+    /// while it runs, so the key press never reaches us as an AppKit event —
+    /// it has to be grabbed as a system-wide hot key for as long as the
+    /// countdown is on screen. Shared across controllers: only one countdown
+    /// is ever live, and a fresh `HotKeyManager` per capture would install a
+    /// Carbon event handler that outlives it.
+    private static let escapeHotKey = HotKeyManager()
+
     func start(seconds initial: Int, onCancel: (() -> Void)? = nil, onFinish: @escaping () -> Void) {
         cancelHandler = onCancel
+        Self.escapeHotKey.register(keyCode: UInt32(kVK_Escape), modifiers: 0) { [weak self] in
+            self?.cancel()
+        }
         var remaining = initial
         let state = CountdownState(seconds: remaining)
 
@@ -95,6 +108,7 @@ final class CountdownController {
     }
 
     private func cleanup() {
+        Self.escapeHotKey.unregister()
         timer?.invalidate()
         timer = nil
         closePanel(&panel)
@@ -117,7 +131,7 @@ private struct CountdownView: View {
                     .font(.system(size: 72, weight: .bold, design: .rounded))
                     .monospacedDigit()
                     .foregroundStyle(.primary)
-                Text("Click to cancel")
+                Text("Click or esc to cancel")
                     .font(.system(size: 11, weight: .medium))
                     .foregroundStyle(.secondary)
             }
